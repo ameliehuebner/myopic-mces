@@ -22,6 +22,8 @@ add_library(mmces_filters SHARED
 set_target_properties(mmces_filters PROPERTIES PREFIX "")
 if(WIN32)
     set_target_properties(mmces_filters PROPERTIES SUFFIX ".pyd")
+elseif(APPLE)
+    set_target_properties(mmces_filters PROPERTIES SUFFIX ".so")
 endif()
 
 cmake_policy(SET CMP0167 NEW)
