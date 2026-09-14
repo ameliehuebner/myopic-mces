@@ -120,6 +120,14 @@ cd "$BOOST_ROOT"
     --prefix="$ENV_PATH" \
     --with-libraries=python,serialization,iostreams,system
 
+# bootstrap.sh auto-detects Python headers as <python-prefix>/include/pythonX.Y,
+# which is wrong inside cibuildwheel's build venv (venvs don't ship headers,
+# only the base install does) - point it at the real headers explicitly.
+PYTHON_INCLUDE=$(python -c "import sysconfig; print(sysconfig.get_path('include'))")
+PYTHON_LIBDIR=$(python -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR') or '')")
+sed -i.bak "/using python/d" project-config.jam
+echo "using python : ${PYTAG} : $(command -v python) : ${PYTHON_INCLUDE} : ${PYTHON_LIBDIR} ;" >> project-config.jam
+
 ./b2 \
     variant=release \
     link=shared \
