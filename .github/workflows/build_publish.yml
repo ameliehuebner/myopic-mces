@@ -14,7 +14,7 @@ jobs:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
+      fail-fast: true           # TODO: for now, while debugging
       matrix:
         os: [ubuntu-latest, ubuntu-24.04-arm, macos-15-intel, macos-latest]
         # windows-latest, windows-11-vs2026-arm
