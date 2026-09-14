@@ -35,19 +35,19 @@ set(RDKIT_BUILD_INCLUDE_DIR "$ENV{RDKIT_BUILD_INCLUDE_DIR}")
 # longer build for multiple architectures and Python versions
 # includes self-compiled rdkit and boost versions
 file(GLOB BOOST_PYTHON_LIBRARY
-    "$ENV{CONDA_PREFIX}/libboost_python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}-*.so.*"
+    "$ENV{CONDA_PREFIX}/libboost_python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}*"
 )
 
 file(GLOB RDKIT_GRAPHMOL_LIBRARY
-    "${RDKIT_LIB_DIR}/libRDKitGraphMol-*.so.*"
+    "${RDKIT_LIB_DIR}/libRDKitGraphMol*"
 )
 
 file(GLOB RDKIT_DATASTRUCTS_LIBRARY
-    "${RDKIT_LIB_DIR}/libRDKitDataStructs-*.so.*"
+    "${RDKIT_LIB_DIR}/libRDKitDataStructs*"
 )
 
 file(GLOB RDKIT_SMILESPARSE_LIBRARY
-    "${RDKIT_LIB_DIR}/libRDKitSmilesParse-*.so.*"
+    "${RDKIT_LIB_DIR}/libRDKitSmilesParse*"
 )
 
 message(STATUS "Boost.Python: ${BOOST_PYTHON_LIBRARY}")
