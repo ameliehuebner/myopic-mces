@@ -4,12 +4,12 @@ channels:
   - conda-forge
 dependencies:
   - python=3.12
-  - libboost-devel=1.84.0
+  #- libboost-devel=1.86.0
   - compilers=1.11.0
   - cmake=4.4.0
-  - boost-cpp=1.86.0
+  #- boost-cpp=1.86.0
   - eigen=5.0.1
-  - conda-forge::libboost-python=1.84.0
+  - conda-forge::libboost-python=1.86.0
   - librdkit-dev=2025.3.4
   - cibuildwheel=4.2.0
   - pytest=9.1.1
@@ -21,6 +21,6 @@ dependencies:
       - networkx==3.6.1
       - pathspec==1.1.1
       - pulp==3.3.2
-      - rdkit==2024.9.1
+      - rdkit==2025.3.4
       - scikit-build-core==1.0.3
       - scipy==1.18.1
