@@ -4,7 +4,6 @@ set -euxo pipefail
 
 # Setup python and rdkit paths
 PYTAG=$(python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
-PYTAG_NO_DOT=$(python -c "import sys; print(f'{sys.version_info.major}{sys.version_info.minor}')")
 ENV_PATH=/tmp/mm_env
 rm -rf "$ENV_PATH"
 
@@ -103,24 +102,19 @@ tar -xzf /tmp/boost.tar.gz \
 cd "$BOOST_ROOT"
 ./bootstrap.sh \
     --prefix="$ENV_PATH" \
-    --with-libraries=python,serialization,iostreams,system
+    --with-libraries=serialization,iostreams,system
 
 ./b2 \
-    -j2 \
+    -j"$(nproc)" \
     variant=release \
     link=shared \
     runtime-link=shared \
     install
 
-"$ENV_PATH/bin/python" -c 'import sys; print(sys.version)'
-strings "$ENV_PATH/lib/libboost_python${PYTAG_NO_DOT}.so" | grep GLIBCXX_ | sort -V | tail
-
 rm -rf /tmp/rdkit-build
 
 cmake -S /tmp/rdkit -B /tmp/rdkit-build \
     -DCMAKE_PREFIX_PATH="$ENV_PATH" \
-    -DBoost_ROOT="$ENV_PATH" \
-    -DBOOST_ROOT="$ENV_PATH" \
     -DRDK_BUILD_PYTHON_WRAPPERS=OFF \
     -DRDK_BUILD_CPP_TESTS=OFF \
     -DRDK_BUILD_CAIRO_SUPPORT=OFF \
@@ -140,4 +134,3 @@ cd /
 export RDKIT_LIB_DIR="$ENV_PATH/lib/python${PYTAG}/site-packages/rdkit.libs"
 export LD_LIBRARY_PATH=/tmp/mm_env/lib/python${PYTAG}/site-packages/rdkit.libs:$LD_LIBRARY_PATH
 export PYTAG
-export PYTAG_NO_DOT

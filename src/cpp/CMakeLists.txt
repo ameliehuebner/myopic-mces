@@ -6,8 +6,11 @@ include(GNUInstallDirs)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
+#set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+#set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
+#set(CMAKE_INSTALL_RPATH "$ENV{CONDA_PREFIX}/lib")
+#set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+#set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 
@@ -26,17 +29,23 @@ elseif(APPLE)
     set_target_properties(mmces_filters PROPERTIES SUFFIX ".so")
 endif()
 
-cmake_policy(SET CMP0167 NEW)
+#cmake_policy(SET CMP0167 NEW)
 
 set(RDKIT_LIB_DIR "$ENV{RDKIT_LIB_DIR}")
 set(RDKIT_INCLUDE_DIR "$ENV{RDKIT_INCLUDE_DIR}")
 set(RDKIT_BUILD_INCLUDE_DIR "$ENV{RDKIT_BUILD_INCLUDE_DIR}")
 
-# longer build for multiple architectures and Python versions
-# includes self-compiled rdkit and boost versions
-file(GLOB BOOST_PYTHON_LIBRARY
-    "$ENV{CONDA_PREFIX}/libboost_python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}*"
+message(STATUS "RDKit lib directory: ${RDKIT_LIB_DIR}")
+message(STATUS "RDKit include directory: ${RDKIT_INCLUDE_DIR}")
+message(STATUS "RDKit build include directory: ${RDKIT_BUILD_INCLUDE_DIR}")
+
+file(GLOB BOOST_RDKIT_LIBRARY
+    "${RDKIT_LIB_DIR}/libboost_python*.so*"
 )
+
+if(BOOST_RDKIT_LIBRARY)
+    list(GET BOOST_RDKIT_LIBRARY 0 BOOST_RDKIT_LIBRARY)
+endif()
 
 file(GLOB RDKIT_GRAPHMOL_LIBRARY
     "${RDKIT_LIB_DIR}/libRDKitGraphMol*"
@@ -50,18 +59,16 @@ file(GLOB RDKIT_SMILESPARSE_LIBRARY
     "${RDKIT_LIB_DIR}/libRDKitSmilesParse*"
 )
 
-message(STATUS "Boost.Python: ${BOOST_PYTHON_LIBRARY}")
+message(STATUS "Conda Dir: $ENV{CONDA_PREFIX}")
+message(STATUS "Boost.Python: ${BOOST_RDKIT_LIBRARY}")
 message(STATUS "RDKit graphmol: ${RDKIT_GRAPHMOL_LIBRARY}")
 message(STATUS "RDKit datastructs: ${RDKIT_DATASTRUCTS_LIBRARY}")
 message(STATUS "RDKit smilesparse: ${RDKIT_SMILESPARSE_LIBRARY}")
 
-set(RDKIT_INCLUDE_DIR "$ENV{RDKIT_INCLUDE_DIR}")
-set(RDKIT_BUILD_INCLUDE_DIR "$ENV{RDKIT_BUILD_INCLUDE_DIR}")
 
-message(STATUS "RDKit include directory: ${RDKIT_INCLUDE_DIR}")
-message(STATUS "RDKit build include directory: ${RDKIT_BUILD_INCLUDE_DIR}")
-target_compile_definitions(mmces_filters PRIVATE
-    _GLIBCXX_USE_CXX11_ABI=0
+target_compile_options(mmces_filters PRIVATE
+    -U_GLIBCXX_USE_CXX11_ABI 
+    -D_GLIBCXX_USE_CXX11_ABI=0
 )
 
 target_include_directories(mmces_filters PRIVATE
@@ -69,6 +76,7 @@ target_include_directories(mmces_filters PRIVATE
     "${RDKIT_BUILD_INCLUDE_DIR}"
     "${RDKIT_LIB_DIR}"
     "$ENV{CONDA_PREFIX}/include"
+    "$ENV{BOOST_INCLUDE_DIR}"
 )
 
 target_link_directories(mmces_filters PRIVATE
@@ -76,7 +84,7 @@ target_link_directories(mmces_filters PRIVATE
 )
 
 target_link_libraries(mmces_filters PRIVATE
-    "${BOOST_PYTHON_LIBRARY}"
+    "${BOOST_RDKIT_LIBRARY}"
     Python::Module
     "${RDKIT_DATASTRUCTS_LIBRARY}"
     "${RDKIT_GRAPHMOL_LIBRARY}"
