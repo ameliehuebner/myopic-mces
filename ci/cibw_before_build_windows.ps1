@@ -10,11 +10,20 @@ if (Test-Path $EnvPath) { Remove-Item -Recurse -Force $EnvPath }
 
 $RdkitSourceDir = "C:\rdkit_src"
 
-# Setup conda env
-Invoke-WebRequest -Uri "https://micro.mamba.pm/api/micromamba/win-64/latest" -OutFile "C:\micromamba.tar.bz2"
-# micromamba's win-64 archive layout: Library/bin/micromamba.exe
-tar -xjf "C:\micromamba.tar.bz2" -C "C:\" "Library/bin/micromamba.exe"
-$Micromamba = "C:\Library\bin\micromamba.exe"
+#setup conda env
+$MicromambaDir = "C:\micromamba"
+
+New-Item -ItemType Directory -Path $MicromambaDir -Force | Out-Null
+
+Invoke-WebRequest `
+    -Uri "https://micro.mamba.pm/api/micromamba/win-64/latest" `
+    -OutFile "C:\micromamba.tar.bz2"
+
+tar -xjf "C:\micromamba.tar.bz2" `
+    -C $MicromambaDir `
+    "Library/bin/micromamba.exe"
+
+$Micromamba = "$MicromambaDir\Library\bin\micromamba.exe"
 $env:MAMBA_ROOT_PREFIX = "C:\mamba_root"
 
 & $Micromamba create -y -p $EnvPath -c conda-forge "python=$PYTAG" "eigen"
