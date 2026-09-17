@@ -53,8 +53,7 @@ wheel.expand-macos-universal-tags = false
 
 [tool.cibuildwheel]
 build = "cp310-* cp311-* cp312-* cp313-* cp314-*"
-#build = "cp313-* cp314-*"
-skip = "*-musllinux_* pp*" # does not work with conda-forge Boost
+skip = "*-musllinux_*" # does not work with conda-forge Boost
 
 # this does not the test the repo, but the wheel after repairing
 # important to check if bindings are valid
@@ -99,7 +98,8 @@ LD_LIBRARY_PATH = "/tmp/mm_env/lib:/tmp/mm_env/lib/python${PYTAG}/site-packages/
 [tool.cibuildwheel.macos]
 before-build = "bash {project}/ci/cibw_before_build_macos.sh"
 repair-wheel-command = """
-DYLD_LIBRARY_PATH=/tmp/mm_env/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} {wheel}
+export DYLD_LIBRARY_PATH=/tmp/mm_env/lib/python${PYTAG}/site-packages/rdkit/.dylibs:/tmp/mm_env/lib &&
+delocate-wheel --require-archs {delocate_archs} -w {dest_dir} {wheel}
 """
 [tool.cibuildwheel.macos.environment]
 MACOSX_DEPLOYMENT_TARGET = "11.0"

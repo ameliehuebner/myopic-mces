@@ -58,7 +58,7 @@ jobs:
       - run: uv sync --group dev --no-install-project
       - run: uv pip install --no-deps --find-links wheels/ myopic-mces
 
-      - run: uv run pytest -m 'not timelimit' -k 'not CPLEX_PY'
+      - run: uv run --no-sync pytest -m 'not timelimit' -k 'not CPLEX_PY'
 
       # - name: Setup tmate session
       #   if: ${{ failure() }}
