@@ -22,7 +22,12 @@ add_library(mmces_filters SHARED
             filter2.cpp
             Hungarian.cpp)
 
-set_target_properties(mmces_filters PROPERTIES PREFIX "")
+set_target_properties(mmces_filters PROPERTIES 
+    PREFIX ""
+    BUILD_RPATH "$ORIGIN/rdkit.libs"
+    INSTALL_RPATH "$ORIGIN/rdkit.libs"
+)
+
 if(WIN32)
     set_target_properties(mmces_filters PROPERTIES SUFFIX ".pyd")
 elseif(APPLE)

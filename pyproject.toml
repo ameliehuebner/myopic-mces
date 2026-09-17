@@ -57,9 +57,15 @@ skip = "*-musllinux_*" # does not work with conda-forge Boost
 
 # this does not the test the repo, but the wheel after repairing
 # important to check if bindings are valid
+# and it also checks if there are duplicate library dependencies present
 test-command = """
 python -c 'from rdkit import Chem; import mmces_filters; m=Chem.MolFromSmiles(\"CCO\"); print(type(m)); print(mmces_filters.filter2.__doc__); mmces_filters.filter2(m,m)' &&
 pytest -m 'not timelimit' -k 'not CPLEX_PY'
+find /tmp -name mmces_filters.so -exec sh -c '
+    echo "=== $1"
+    readelf -d "$1" | grep -E "RPATH|RUNPATH|NEEDED"
+    ldd "$1" | grep -E "boost_python|RDKit"
+' _ {} \;
 """
 test-sources = ["tests", "testdata"]
 test-groups = ["dev"]

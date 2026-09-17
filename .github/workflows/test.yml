@@ -30,7 +30,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: wheels/
-          key: fastwheel-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('src/cpp/**', 'pyproject.toml', 'ci/test-env.yml') }}
+          key: fastwheel-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('src/cpp/**', 'pyproject.toml') }}
 
       - name: Build fast wheel
         if: steps.cache-mm-wheel.outputs.cache-hit != 'true'
@@ -45,7 +45,7 @@ jobs:
           export RDKIT_BUILD_INCLUDE_DIR="$CONDA_PREFIX/include"
 
           pip wheel . -w wheels/ --no-deps --no-build-isolation \
-            -C cmake.define.Python_ROOT_DIR="$CONDA_PREFIX"
+            -C cmake.define.Python3_ROOT_DIR="$CONDA_PREFIX"
             
           ls -la wheels/
 
@@ -55,10 +55,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
 
-      - run: uv sync --group dev --no-install-project
+      - run: uv sync --group dev --no-install-workspace
       - run: uv pip install --no-deps --find-links wheels/ myopic-mces
 
-      - run: uv run --no-sync pytest -m 'not timelimit' -k 'not CPLEX_PY'
+      - run: uv run --no-project pytest -m 'not timelimit' -k 'not CPLEX_PY'
 
       # - name: Setup tmate session
       #   if: ${{ failure() }}
