@@ -47,10 +47,8 @@ cmd.exe /c "call `"$VcVars`" && set" | ForEach-Object {
         [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2])
     }
 }
-cl.exe
-if ($LASTEXITCODE -ne 0) {
-    throw "cl.exe failed with exit code $LASTEXITCODE"
-}
+Write-Host "MSVC:"
+cmd.exe /c "cl" 2>&1 | Select-String "Version"
 
 # get RDKit headers for bindings
 Set-Location "C:\"
