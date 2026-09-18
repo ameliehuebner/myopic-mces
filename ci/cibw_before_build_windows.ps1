@@ -95,6 +95,20 @@ Invoke-WebRequest `
 Expand-Archive -Path "C:\boost.zip" -DestinationPath "C:\boost_extract"
 Move-Item "C:\boost_extract\boost_$BoostUnderscored" $BoostRoot
 
+# VS-Installationspfad per vswhere finden (ihr habt das Tool laut Log schon im System)
+$vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" `
+    -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+    -property installationPath
+
+$vcvars = Join-Path $vsPath "VC\Auxiliary\Build\vcvarsall.bat"
+
+# Umgebungsvariablen aus vcvarsall.bat in die aktuelle PowerShell-Session übernehmen
+cmd /c "`"$vcvars`" x64 && set" | ForEach-Object {
+    if ($_ -match "^(.*?)=(.*)$") {
+        Set-Item -Path "Env:\$($matches[1])" -Value $matches[2]
+    }
+}
+
 Set-Location $BoostRoot
 & .\bootstrap.bat vc143
 
