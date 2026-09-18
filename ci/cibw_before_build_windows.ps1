@@ -35,6 +35,9 @@ $RDKitDir = & "$EnvPath\python.exe" -c "import rdkit; from pathlib import Path; 
 Write-Host $RDKitDir
 Get-ChildItem "$RDKitDir\..\rdkit.libs"
 
+####### setup MSVC env
+Write-Host "------------ setting up MSVC env"
+
 # Compiler: rely on MSVC already provided by the cibuildwheel Windows runner image.
 # Locate and load the VS dev environment (vcvarsall) so cl.exe / link.exe are on PATH.
 $VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
@@ -48,6 +51,7 @@ cmd.exe /c "call `"$VcVars`" && set" | ForEach-Object {
     }
 }
 
+Write-Host "------------ geting rdkit headers"
 # get RDKit headers for bindings
 Set-Location "C:\"
 if (Test-Path $RdkitSourceDir) { Remove-Item -Recurse -Force $RdkitSourceDir }
@@ -65,6 +69,7 @@ if (-not (Test-Path "$RdkitSourceDir\Code\GraphMol\ROMol.h")) {
 Write-Host "RDKit headers: $RdkitSourceDir\Code"
 
 # determine Boost version used by pip RDKit
+Write-Host "----------- determining boost version"
 Set-Location "C:\"
 $RDKitSite = & "$EnvPath\python.exe" -c "import rdkit, os; print(os.path.dirname(rdkit.__file__))"
 $RDChem = Get-ChildItem -Path $RDKitSite -Filter "rdchem*.pyd" -Recurse | Select-Object -First 1
@@ -86,31 +91,33 @@ $BoostVersion = "1.85.0"   # verify/pin against actual RDKit conda-forge build
 Write-Host "Using Boost version: $BoostVersion"
 
 # build matching Boost from source
+Write-Host "----------- building boost from source"
 $BoostRoot = "C:\boost_$($BoostVersion -replace '\.','_')"
 if (Test-Path $BoostRoot) { Remove-Item -Recurse -Force $BoostRoot }
 $BoostUnderscored = $BoostVersion -replace '\.', '_'
+
 Invoke-WebRequest `
     -Uri "https://archives.boost.io/release/$BoostVersion/source/boost_$BoostUnderscored.zip" `
     -OutFile "C:\boost.zip"
+
 Expand-Archive -Path "C:\boost.zip" -DestinationPath "C:\boost_extract"
 Move-Item "C:\boost_extract\boost_$BoostUnderscored" $BoostRoot
 
-# VS-Installationspfad per vswhere finden (ihr habt das Tool laut Log schon im System)
-$vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" `
-    -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
-    -property installationPath
-
-$vcvars = Join-Path $vsPath "VC\Auxiliary\Build\vcvarsall.bat"
-
-# Umgebungsvariablen aus vcvarsall.bat in die aktuelle PowerShell-Session übernehmen
-cmd /c "`"$vcvars`" x64 && set" | ForEach-Object {
-    if ($_ -match "^(.*?)=(.*)$") {
-        Set-Item -Path "Env:\$($matches[1])" -Value $matches[2]
-    }
-}
-
 Set-Location $BoostRoot
+Write-Host "cl.exe:"
+where.exe cl.exe
+
+Write-Host "msvc.exe:"
+where.exe msvc.exe
+
+Write-Host "VSINSTALLDIR: $env:VSINSTALLDIR"
+Write-Host "VCToolsInstallDir: $env:VCToolsInstallDir"
+
 & .\bootstrap.bat vc143
+
+if (-not (Test-Path ".\b2.exe")) {
+    throw "Boost bootstrap failed"
+}
 
 & .\b2.exe `
     toolset=msvc `
@@ -123,6 +130,7 @@ Set-Location $BoostRoot
 
 & "$EnvPath\python.exe" -c "import sys; print(sys.version)"
 
+Write-Host "----------- building rdkit"
 if (Test-Path "C:\rdkit-build") { Remove-Item -Recurse -Force "C:\rdkit-build" }
 
 cmake -S "C:\rdkit_src" -B "C:\rdkit-build" `
