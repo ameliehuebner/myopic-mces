@@ -96,7 +96,7 @@ Expand-Archive -Path "C:\boost.zip" -DestinationPath "C:\boost_extract"
 Move-Item "C:\boost_extract\boost_$BoostUnderscored" $BoostRoot
 
 Set-Location $BoostRoot
-& .\bootstrap.bat
+& .\bootstrap.bat vc143
 
 & .\b2.exe `
     toolset=msvc `
