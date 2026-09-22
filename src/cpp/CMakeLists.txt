@@ -6,11 +6,6 @@ include(GNUInstallDirs)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-#set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-#set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
-#set(CMAKE_INSTALL_RPATH "$ENV{CONDA_PREFIX}/lib")
-#set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-#set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 
@@ -44,25 +39,22 @@ message(STATUS "RDKit lib directory: ${RDKIT_LIB_DIR}")
 message(STATUS "RDKit include directory: ${RDKIT_INCLUDE_DIR}")
 message(STATUS "RDKit build include directory: ${RDKIT_BUILD_INCLUDE_DIR}")
 
-file(GLOB BOOST_RDKIT_LIBRARY
-    "${RDKIT_LIB_DIR}/libboost_python*.so*"
-)
+if(WIN32)
+    file(GLOB RDKIT_GRAPHMOL_LIBRARY "${RDKIT_LIB_DIR}/RDKitGraphMol*.lib")
+    file(GLOB RDKIT_DATASTRUCTS_LIBRARY "${RDKIT_LIB_DIR}/RDKitDataStructs*.lib")
+    file(GLOB RDKIT_SMILESPARSE_LIBRARY "${RDKIT_LIB_DIR}/RDKitSmilesParse*.lib")
+    file(GLOB BOOST_PYTHON_LIBRARY "$ENV{CONDA_PREFIX}/lib/boost_python*.lib")
+else()
+    file(GLOB BOOST_RDKIT_LIBRARY "${RDKIT_LIB_DIR}/libboost_python*.so*")
 
-if(BOOST_RDKIT_LIBRARY)
-    list(GET BOOST_RDKIT_LIBRARY 0 BOOST_RDKIT_LIBRARY)
+    if(BOOST_RDKIT_LIBRARY)
+        list(GET BOOST_RDKIT_LIBRARY 0 BOOST_RDKIT_LIBRARY)
+    endif()
+
+    file(GLOB RDKIT_GRAPHMOL_LIBRARY "${RDKIT_LIB_DIR}/libRDKitGraphMol*")
+    file(GLOB RDKIT_DATASTRUCTS_LIBRARY "${RDKIT_LIB_DIR}/libRDKitDataStructs*")
+    file(GLOB RDKIT_SMILESPARSE_LIBRARY "${RDKIT_LIB_DIR}/libRDKitSmilesParse*")     
 endif()
-
-file(GLOB RDKIT_GRAPHMOL_LIBRARY
-    "${RDKIT_LIB_DIR}/libRDKitGraphMol*"
-)
-
-file(GLOB RDKIT_DATASTRUCTS_LIBRARY
-    "${RDKIT_LIB_DIR}/libRDKitDataStructs*"
-)
-
-file(GLOB RDKIT_SMILESPARSE_LIBRARY
-    "${RDKIT_LIB_DIR}/libRDKitSmilesParse*"
-)
 
 message(STATUS "Conda Dir: $ENV{CONDA_PREFIX}")
 message(STATUS "Boost.Python: ${BOOST_RDKIT_LIBRARY}")
