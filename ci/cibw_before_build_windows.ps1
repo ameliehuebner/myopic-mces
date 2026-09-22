@@ -113,6 +113,13 @@ where.exe msvc.exe
 Write-Host "VSINSTALLDIR: $env:VSINSTALLDIR"
 Write-Host "VCToolsInstallDir: $env:VCToolsInstallDir"
 
+$ShimDir = "C:\boost-shim"
+New-Item -ItemType Directory -Force $ShimDir | Out-Null
+
+"@echo off`r`ncl.exe %*" | Set-Content "$ShimDir\msvc.bat"
+
+$env:Path = "$ShimDir;$env:Path"
+
 & .\bootstrap.bat vc143
 
 if (-not (Test-Path ".\b2.exe")) {
