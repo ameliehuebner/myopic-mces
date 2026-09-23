@@ -116,6 +116,7 @@ CXX = "clang++"
 ############################ CIBW WINDOWS
 
 [tool.cibuildwheel.windows]
+archs = ["auto64"]
 before-build = "powershell {project}/ci/cibw_before_build_windows.ps1"
 repair-wheel-command = """
 delvewheel repair --add-path C:/mm_env/Library/bin -w {dest_dir} {wheel}

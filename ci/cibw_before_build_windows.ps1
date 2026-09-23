@@ -164,3 +164,12 @@ $env:RDKIT_LIB_DIR = "$EnvPath\Lib\site-packages\rdkit.libs"
 $env:PATH = "$EnvPath\Lib\site-packages\rdkit.libs;$env:PATH"
 $env:PYTAG = $PYTAG
 $env:PYTAG_NO_DOT = $PYTAG_NO_DOT
+
+Write-Host "=== RDKit ==="
+Test-Path "C:\rdkit_src\Code\GraphMol\ROMol.h"
+Test-Path "C:\rdkit_src\Code\RDGeneral\export.h"
+Test-Path "C:\rdkit_build\Code\RDGeneral\export.h"
+
+Write-Host "=== Boost ==="
+Test-Path "C:\mm_env\include\boost\python.hpp"
+Get-ChildItem "C:\mm_env\lib" -Filter "*boost*python*" -ErrorAction SilentlyContinue

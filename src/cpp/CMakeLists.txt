@@ -43,17 +43,16 @@ if(WIN32)
     file(GLOB RDKIT_GRAPHMOL_LIBRARY "${RDKIT_LIB_DIR}/RDKitGraphMol*.lib")
     file(GLOB RDKIT_DATASTRUCTS_LIBRARY "${RDKIT_LIB_DIR}/RDKitDataStructs*.lib")
     file(GLOB RDKIT_SMILESPARSE_LIBRARY "${RDKIT_LIB_DIR}/RDKitSmilesParse*.lib")
-    file(GLOB BOOST_PYTHON_LIBRARY "$ENV{CONDA_PREFIX}/lib/boost_python*.lib")
+    file(GLOB BOOST_RDKIT_LIBRARY "${RDKIT_LIB_DIR}/libboost_python*.lib")
 else()
     file(GLOB BOOST_RDKIT_LIBRARY "${RDKIT_LIB_DIR}/libboost_python*.so*")
-
-    if(BOOST_RDKIT_LIBRARY)
-        list(GET BOOST_RDKIT_LIBRARY 0 BOOST_RDKIT_LIBRARY)
-    endif()
-
     file(GLOB RDKIT_GRAPHMOL_LIBRARY "${RDKIT_LIB_DIR}/libRDKitGraphMol*")
     file(GLOB RDKIT_DATASTRUCTS_LIBRARY "${RDKIT_LIB_DIR}/libRDKitDataStructs*")
     file(GLOB RDKIT_SMILESPARSE_LIBRARY "${RDKIT_LIB_DIR}/libRDKitSmilesParse*")     
+endif()
+
+if(BOOST_RDKIT_LIBRARY)
+    list(GET BOOST_RDKIT_LIBRARY 0 BOOST_RDKIT_LIBRARY)
 endif()
 
 message(STATUS "Conda Dir: $ENV{CONDA_PREFIX}")
@@ -62,11 +61,12 @@ message(STATUS "RDKit graphmol: ${RDKIT_GRAPHMOL_LIBRARY}")
 message(STATUS "RDKit datastructs: ${RDKIT_DATASTRUCTS_LIBRARY}")
 message(STATUS "RDKit smilesparse: ${RDKIT_SMILESPARSE_LIBRARY}")
 
-
-target_compile_options(mmces_filters PRIVATE
-    -U_GLIBCXX_USE_CXX11_ABI 
-    -D_GLIBCXX_USE_CXX11_ABI=0
-)
+if (NOT MSVC)
+    target_compile_options(mmces_filters PRIVATE
+        -U_GLIBCXX_USE_CXX11_ABI 
+        -D_GLIBCXX_USE_CXX11_ABI=0
+    )
+endif()
 
 target_include_directories(mmces_filters PRIVATE
     "${RDKIT_INCLUDE_DIR}"
