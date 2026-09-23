@@ -134,6 +134,10 @@ Write-Host "----------- installing Boost"
     link=shared `
     runtime-link=shared `
     --prefix="$EnvPath" `
+    --with-python `
+    --with-serialization `
+    --with-iostreams `
+    --with-system `
     install
 
 Write-Host "=== Boost ==="
