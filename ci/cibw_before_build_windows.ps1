@@ -118,7 +118,7 @@ $env:Path = "$ShimDir;$env:Path"
 
 Write-Host "----------- bootstrapping Boost"
 
-& .\bootstrap.bat `
+& .\bootstrap.bat vc143 `
     --with-python="$EnvPath\python.exe" `
     --with-libraries=python,serialization,iostreams,system
 
@@ -138,6 +138,7 @@ Write-Host "----------- installing Boost"
 
 Write-Host "=== Boost ==="
 Test-Path "$EnvPath\include\boost\python.hpp"
+Get-ChildItem "$EnvPath\lib" -Filter "*boost*python*.lib" -ErrorAction SilentlyContinue
 
 $BoostLib = Get-ChildItem "$EnvPath\lib" `
     -Filter "*boost*python*.lib" `
