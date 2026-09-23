@@ -104,27 +104,29 @@ Expand-Archive -Path "C:\boost.zip" -DestinationPath "C:\boost_extract"
 Move-Item "C:\boost_extract\boost_$BoostUnderscored" $BoostRoot
 
 Set-Location $BoostRoot
+
 Write-Host "cl.exe:"
 where.exe cl.exe
-
-Write-Host "msvc.exe:"
-where.exe msvc.exe
 
 Write-Host "VSINSTALLDIR: $env:VSINSTALLDIR"
 Write-Host "VCToolsInstallDir: $env:VCToolsInstallDir"
 
 $ShimDir = "C:\boost-shim"
 New-Item -ItemType Directory -Force $ShimDir | Out-Null
-
 "@echo off`r`ncl.exe %*" | Set-Content "$ShimDir\msvc.bat"
-
 $env:Path = "$ShimDir;$env:Path"
 
-& .\bootstrap.bat vc143
+Write-Host "----------- bootstrapping Boost"
+
+& .\bootstrap.bat `
+    --with-python="$EnvPath\python.exe" `
+    --with-libraries=python,serialization,iostreams,system
 
 if (-not (Test-Path ".\b2.exe")) {
     throw "Boost bootstrap failed"
 }
+
+Write-Host "----------- installing Boost"
 
 & .\b2.exe `
     toolset=msvc `
@@ -132,11 +134,24 @@ if (-not (Test-Path ".\b2.exe")) {
     link=shared `
     runtime-link=shared `
     --prefix="$EnvPath" `
-    --with-python --with-serialization --with-iostreams --with-system `
     install
 
-& "$EnvPath\python.exe" -c "import sys; print(sys.version)"
+Write-Host "=== Boost ==="
+Test-Path "$EnvPath\include\boost\python.hpp"
 
+$BoostLib = Get-ChildItem "$EnvPath\lib" `
+    -Filter "*boost*python*.lib" `
+    -ErrorAction SilentlyContinue
+
+$BoostLib
+
+if (-not (Test-Path "$EnvPath\include\boost\python.hpp")) {
+    throw "Boost.Python headers were not installed"
+}
+
+if (-not $BoostLib) {
+    throw "Boost.Python library was not installed"
+}
 Write-Host "----------- building rdkit"
 if (Test-Path "C:\rdkit-build") { Remove-Item -Recurse -Force "C:\rdkit-build" }
 
@@ -157,6 +172,16 @@ cmake -S "C:\rdkit_src" -B "C:\rdkit-build" `
 $env:RDKit_INCLUDE_DIR = "$RdkitSourceDir\Code"
 $env:RDKit_LIBRARY_DIR = "$EnvPath\lib"
 
+Write-Host "=== RDKit generated headers ==="
+Get-ChildItem "C:\rdkit-build" -Filter "export.h" -Recurse -ErrorAction SilentlyContinue |
+    Select-Object -ExpandProperty FullName
+
+Write-Host "=== Boost headers ==="
+Test-Path "$EnvPath\include\boost\python.hpp"
+
+Write-Host "=== Boost libraries ==="
+Get-ChildItem "$EnvPath\lib" -Filter "*boost*python*" -ErrorAction SilentlyContinue
+
 Set-Location "C:\"
 & "$EnvPath\python.exe" -c "import rdkit; print(rdkit.__version__); print(rdkit.__file__)"
 
@@ -173,3 +198,11 @@ Test-Path "C:\rdkit_build\Code\RDGeneral\export.h"
 Write-Host "=== Boost ==="
 Test-Path "C:\mm_env\include\boost\python.hpp"
 Get-ChildItem "C:\mm_env\lib" -Filter "*boost*python*" -ErrorAction SilentlyContinue
+
+if (-not (Test-Path "$EnvPath\include\boost\python.hpp")) {
+    throw "Boost.Python headers were not installed"
+}
+
+if (-not (Test-Path "$EnvPath\lib\boost_python*.lib")) {
+    throw "Boost.Python library was not installed"
+}
