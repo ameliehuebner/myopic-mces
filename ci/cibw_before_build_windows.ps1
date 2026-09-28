@@ -141,8 +141,7 @@ Write-Host "----------- installing Boost"
     install
 
 Write-Host "=== Boost ==="
-Test-Path "$EnvPath\include\boost\python.hpp"
-Get-ChildItem "$EnvPath\lib" -Filter "*boost*python*.lib" -ErrorAction SilentlyContinue
+Get-ChildItem "C:\mm_env\include" -Filter "python.hpp" -Recurse
 
 $BoostLib = Get-ChildItem "$EnvPath\lib" `
     -Filter "*boost*python*.lib" `
@@ -150,16 +149,30 @@ $BoostLib = Get-ChildItem "$EnvPath\lib" `
 
 $BoostLib
 
-if (-not (Test-Path "$EnvPath\include\boost\python.hpp")) {
+$BoostPythonHeader = Get-ChildItem "$EnvPath\include" `
+    -Filter "python.hpp" `
+    -Recurse `
+    -ErrorAction SilentlyContinue |
+    Select-Object -First 1
+
+if (-not $BoostPythonHeader) {
     throw "Boost.Python headers were not installed"
 }
 
 if (-not $BoostLib) {
     throw "Boost.Python library was not installed"
 }
-Write-Host "----------- building rdkit"
-if (Test-Path "C:\rdkit-build") { Remove-Item -Recurse -Force "C:\rdkit-build" }
 
+$BoostIncludeDir = $BoostPythonHeader.Directory.Parent.FullName
+Write-Host "Boost include directory: $BoostIncludeDir"
+
+$env:BOOST_INCLUDE_DIR = $BoostIncludeDir
+
+Write-Host "----------- building rdkit"
+
+if (Test-Path "C:\rdkit-build") {
+    Remove-Item -Recurse -Force "C:\rdkit-build"
+}
 cmake -S "C:\rdkit_src" -B "C:\rdkit-build" `
     -DCMAKE_PREFIX_PATH="$EnvPath" `
     -DBoost_ROOT="$EnvPath" `
