@@ -17,11 +17,14 @@ add_library(mmces_filters SHARED
             filter2.cpp
             Hungarian.cpp)
 
-set_target_properties(mmces_filters PROPERTIES 
-    PREFIX ""
-    BUILD_RPATH "$ORIGIN/rdkit.libs"
-    INSTALL_RPATH "$ORIGIN/rdkit.libs"
-)
+set_target_properties(mmces_filters PROPERTIES PREFIX "")
+
+if(UNIX AND NOT APPLE)
+    set_target_properties(mmces_filters PROPERTIES 
+        BUILD_RPATH "$ORIGIN/rdkit.libs"
+        INSTALL_RPATH "$ORIGIN/rdkit.libs"
+    )
+endif()
 
 if(WIN32)
     set_target_properties(mmces_filters PROPERTIES SUFFIX ".pyd")
@@ -40,11 +43,11 @@ message(STATUS "RDKit include directory: ${RDKIT_INCLUDE_DIR}")
 message(STATUS "RDKit build include directory: ${RDKIT_BUILD_INCLUDE_DIR}")
 
 if(WIN32)
+    file(GLOB BOOST_RDKIT_LIBRARY "${RDKIT_LIB_DIR}/boost_python*.lib")
     file(GLOB RDKIT_GRAPHMOL_LIBRARY "${RDKIT_LIB_DIR}/RDKitGraphMol*.lib")
     file(GLOB RDKIT_DATASTRUCTS_LIBRARY "${RDKIT_LIB_DIR}/RDKitDataStructs*.lib")
     file(GLOB RDKIT_SMILESPARSE_LIBRARY "${RDKIT_LIB_DIR}/RDKitSmilesParse*.lib")
-    # technically this is not boost rdkit, work in progress
-    file(GLOB BOOST_RDKIT_LIBRARY "$ENV{CONDA_PREFIX}/lib/boost_python*.lib")
+    target_compile_definitions(mmces_filters PRIVATE BOOST_ALL_NO_LIB BOOST_PYTHON_DYNAMIC_LIB)
 else()
     file(GLOB BOOST_RDKIT_LIBRARY "${RDKIT_LIB_DIR}/libboost_python*.so*")
     file(GLOB RDKIT_GRAPHMOL_LIBRARY "${RDKIT_LIB_DIR}/libRDKitGraphMol*")

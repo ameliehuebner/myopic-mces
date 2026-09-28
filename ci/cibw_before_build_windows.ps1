@@ -68,6 +68,18 @@ if (-not (Test-Path "$RdkitSourceDir\Code\GraphMol\ROMol.h")) {
 }
 Write-Host "RDKit headers: $RdkitSourceDir\Code"
 
+$libsDir = "$EnvPath\Lib\site-packages\rdkit.libs"
+foreach ($pat in "RDKitGraphMol*","RDKitDataStructs*","RDKitSmilesParse*","boost_python*") {
+    $dll = Get-ChildItem $libsDir -Filter "$pat.dll" | Select-Object -First 1
+    if (-not $dll) { throw "DLL $pat not found" }
+    $exports = & dumpbin /exports $dll.FullName |
+        Select-String '^\s+\d+\s+[0-9A-F]+\s+[0-9A-F]+\s+(\S+)' |
+        ForEach-Object { $_.Matches[0].Groups[1].Value }
+    $def = Join-Path $libsDir "$($dll.BaseName).def"
+    "LIBRARY $($dll.Name)`r`nEXPORTS`r`n" + ($exports -join "`r`n") | Set-Content $def
+    & lib /nologo /def:$def /out:"$libsDir\$($dll.BaseName).lib" /machine:x64
+}
+
 # determine Boost version used by pip RDKit
 Write-Host "----------- determining boost version"
 Set-Location "C:\"
@@ -118,15 +130,9 @@ $env:Path = "$ShimDir;$env:Path"
 
 Write-Host "----------- bootstrapping Boost"
 
-& .\bootstrap.bat vc143 `
-    --with-python="$EnvPath\python.exe" `
-    --with-libraries=python,serialization,iostreams,system
+& .\bootstrap.bat vc143
 
-if (-not (Test-Path ".\b2.exe")) {
-    throw "Boost bootstrap failed"
-}
-
-Write-Host "----------- installing Boost"
+if (-not (Test-Path ".\b2.exe")) { throw "Boost bootstrap failed" }
 
 & .\b2.exe `
     toolset=msvc `
@@ -134,39 +140,29 @@ Write-Host "----------- installing Boost"
     variant=release `
     link=shared `
     runtime-link=shared `
+    --layout=system `
     --prefix="$EnvPath" `
-    --with-python `
     --with-serialization `
     --with-iostreams `
     --with-system `
     install
 
 Write-Host "=== Boost ==="
-$BoostPythonHeader = Get-ChildItem "$EnvPath\include" `
-    -Filter "python.hpp" `
-    -Recurse `
-    -ErrorAction SilentlyContinue |
-    Where-Object { $_.FullName -match "\\boost[^\\]*\\python\.hpp$" } |
-    Select-Object -First 1
+$dll = Get-ChildItem "$EnvPath\Lib\site-packages\rdkit.libs" -Filter "boost_python*.dll" | Select-Object -First 1
+if (-not $dll) { throw "RDKit boost_python DLL not found" }
 
-$BoostPythonLib = Get-ChildItem "$EnvPath\lib" `
-    -Filter "boost_python*.lib" `
-    -ErrorAction SilentlyContinue |
-    Select-Object -First 1
+$exports = & dumpbin /exports $dll.FullName |
+    Select-String '^\s+\d+\s+[0-9A-F]+\s+[0-9A-F]+\s+(\S+)' |
+    ForEach-Object { $_.Matches[0].Groups[1].Value }
 
-Write-Host "Boost.Python header:"
-$BoostPythonHeader
+"LIBRARY $($dll.Name)`r`nEXPORTS`r`n" + ($exports -join "`r`n") |
+    Set-Content "$EnvPath\lib\boost_python.def"
+& lib /nologo /def:"$EnvPath\lib\boost_python.def" /out:"$EnvPath\lib\boost_python_rdkit.lib" /machine:x64
+if (-not (Test-Path "$EnvPath\lib\boost_python_rdkit.lib")) { throw "import lib failed" }
 
-Write-Host "Boost.Python library:"
-$BoostPythonLib
+$env:BOOST_PYTHON_LIB = "$EnvPath\lib\boost_python_rdkit.lib"
 
-if (-not $BoostPythonHeader) {
-    throw "Boost.Python headers were not installed"
-}
-
-if (-not $BoostPythonLib) {
-    throw "Boost.Python library was not installed"
-}
+if (-not (Test-Path "$EnvPath\include\boost\python.hpp")) { throw "Boost headers missing" }
 
 $BoostIncludeDir = $BoostPythonHeader.Directory.Parent.FullName
 
@@ -204,7 +200,7 @@ Write-Host "=== Boost headers ==="
 Test-Path "$EnvPath\include\boost\python.hpp"
 
 Write-Host "=== Boost libraries ==="
-Get-ChildItem "$EnvPath\lib" -Filter "*boost*python*" -ErrorAction SilentlyContinue
+Get-ChildItem "$EnvPath\lib" -Recurse | Where-Object Name -match "boost" | Select-Object FullName
 
 Set-Location "C:\"
 & "$EnvPath\python.exe" -c "import rdkit; print(rdkit.__version__); print(rdkit.__file__)"
