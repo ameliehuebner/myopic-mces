@@ -17,7 +17,7 @@ classifiers = [
 dependencies = [
              "rdkit == 2025.3.4",
              "networkx >= 3.0",
-             "pulp[cbc]>=2.7.0",
+             "pulp[cbc]>=2.7.0,<=3.3.2",
              "scipy >= 1.10.1",
              "joblib >= 1.2.0",
              "pandas>=2.3.3",
@@ -42,8 +42,7 @@ hdf5 = [
 
 [dependency-groups]
 dev = [
-    "pytest>=8.3.5",
-    "pandas>=2.0.3"
+    "pytest>=8.3.5"
 ]
 
 [tool.scikit-build]
