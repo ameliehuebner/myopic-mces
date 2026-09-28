@@ -130,6 +130,7 @@ Write-Host "----------- installing Boost"
 
 & .\b2.exe `
     toolset=msvc `
+    address-model=64 `
     variant=release `
     link=shared `
     runtime-link=shared `
@@ -141,33 +142,38 @@ Write-Host "----------- installing Boost"
     install
 
 Write-Host "=== Boost ==="
-Get-ChildItem "C:\mm_env\include" -Filter "python.hpp" -Recurse
-
-$BoostLib = Get-ChildItem "$EnvPath\lib" `
-    -Filter "*boost*python*.lib" `
-    -ErrorAction SilentlyContinue
-
-$BoostLib
-
 $BoostPythonHeader = Get-ChildItem "$EnvPath\include" `
     -Filter "python.hpp" `
     -Recurse `
     -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -match "\\boost[^\\]*\\python\.hpp$" } |
     Select-Object -First 1
+
+$BoostPythonLib = Get-ChildItem "$EnvPath\lib" `
+    -Filter "boost_python*.lib" `
+    -ErrorAction SilentlyContinue |
+    Select-Object -First 1
+
+Write-Host "Boost.Python header:"
+$BoostPythonHeader
+
+Write-Host "Boost.Python library:"
+$BoostPythonLib
 
 if (-not $BoostPythonHeader) {
     throw "Boost.Python headers were not installed"
 }
 
-if (-not $BoostLib) {
+if (-not $BoostPythonLib) {
     throw "Boost.Python library was not installed"
 }
 
 $BoostIncludeDir = $BoostPythonHeader.Directory.Parent.FullName
+
 Write-Host "Boost include directory: $BoostIncludeDir"
+Write-Host "Boost library: $($BoostPythonLib.FullName)"
 
 $env:BOOST_INCLUDE_DIR = $BoostIncludeDir
-
 Write-Host "----------- building rdkit"
 
 if (Test-Path "C:\rdkit-build") {
