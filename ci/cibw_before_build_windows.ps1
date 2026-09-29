@@ -8,7 +8,7 @@ $PYTAG_NO_DOT = & python -c "import sys; print(f'{sys.version_info.major}{sys.ve
 $EnvPath = "C:\mm_env"
 if (Test-Path $EnvPath) { Remove-Item -Recurse -Force $EnvPath }
 
-$RdkitSourceDir = "C:\rdkit_src"
+$RdkitSourceDir = "C:\rdkit-src"
 
 #setup conda env
 $MicromambaDir = "C:\micromamba"
@@ -78,6 +78,7 @@ foreach ($pat in "RDKitGraphMol*","RDKitDataStructs*","RDKitSmilesParse*","boost
     $def = Join-Path $libsDir "$($dll.BaseName).def"
     "LIBRARY $($dll.Name)`r`nEXPORTS`r`n" + ($exports -join "`r`n") | Set-Content $def
     & lib /nologo /def:$def /out:"$libsDir\$($dll.BaseName).lib" /machine:x64
+    if (-not (Test-Path "$libsDir\$($dll.BaseName).lib")) { throw "import lib for $($dll.Name) failed" }
 }
 
 # determine Boost version used by pip RDKit
@@ -147,27 +148,8 @@ if (-not (Test-Path ".\b2.exe")) { throw "Boost bootstrap failed" }
     --with-system `
     install
 
-Write-Host "=== Boost ==="
-$dll = Get-ChildItem "$EnvPath\Lib\site-packages\rdkit.libs" -Filter "boost_python*.dll" | Select-Object -First 1
-if (-not $dll) { throw "RDKit boost_python DLL not found" }
-
-$exports = & dumpbin /exports $dll.FullName |
-    Select-String '^\s+\d+\s+[0-9A-F]+\s+[0-9A-F]+\s+(\S+)' |
-    ForEach-Object { $_.Matches[0].Groups[1].Value }
-
-"LIBRARY $($dll.Name)`r`nEXPORTS`r`n" + ($exports -join "`r`n") |
-    Set-Content "$EnvPath\lib\boost_python.def"
-& lib /nologo /def:"$EnvPath\lib\boost_python.def" /out:"$EnvPath\lib\boost_python_rdkit.lib" /machine:x64
-if (-not (Test-Path "$EnvPath\lib\boost_python_rdkit.lib")) { throw "import lib failed" }
-
-$env:BOOST_PYTHON_LIB = "$EnvPath\lib\boost_python_rdkit.lib"
-
-if (-not (Test-Path "$EnvPath\include\boost\python.hpp")) { throw "Boost headers missing" }
-
-$BoostIncludeDir = $BoostPythonHeader.Directory.Parent.FullName
-
+$BoostIncludeDir = "$EnvPath\include"
 Write-Host "Boost include directory: $BoostIncludeDir"
-Write-Host "Boost library: $($BoostPythonLib.FullName)"
 
 $env:BOOST_INCLUDE_DIR = $BoostIncludeDir
 Write-Host "----------- building rdkit"
@@ -175,7 +157,7 @@ Write-Host "----------- building rdkit"
 if (Test-Path "C:\rdkit-build") {
     Remove-Item -Recurse -Force "C:\rdkit-build"
 }
-cmake -S "C:\rdkit_src" -B "C:\rdkit-build" `
+cmake -S "C:\rdkit-src" -B "C:\rdkit-build" `
     -DCMAKE_PREFIX_PATH="$EnvPath" `
     -DBoost_ROOT="$EnvPath" `
     -DBOOST_ROOT="$EnvPath" `
@@ -211,9 +193,9 @@ $env:PYTAG = $PYTAG
 $env:PYTAG_NO_DOT = $PYTAG_NO_DOT
 
 Write-Host "=== RDKit ==="
-Test-Path "C:\rdkit_src\Code\GraphMol\ROMol.h"
-Test-Path "C:\rdkit_src\Code\RDGeneral\export.h"
-Test-Path "C:\rdkit_build\Code\RDGeneral\export.h"
+Test-Path "C:\rdkit-src\Code\GraphMol\ROMol.h"
+Test-Path "C:\rdkit-src\Code\RDGeneral\export.h"
+Test-Path "C:\rdkit-build\Code\RDGeneral\export.h"
 
 Write-Host "=== Boost ==="
 Test-Path "C:\mm_env\include\boost\python.hpp"
@@ -221,8 +203,4 @@ Get-ChildItem "C:\mm_env\lib" -Filter "*boost*python*" -ErrorAction SilentlyCont
 
 if (-not (Test-Path "$EnvPath\include\boost\python.hpp")) {
     throw "Boost.Python headers were not installed"
-}
-
-if (-not (Test-Path "$EnvPath\lib\boost_python*.lib")) {
-    throw "Boost.Python library was not installed"
 }
