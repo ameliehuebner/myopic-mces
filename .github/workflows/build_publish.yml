@@ -17,7 +17,7 @@ jobs:
       fail-fast: true           # TODO: for now, while debugging
       matrix:
         os: [ubuntu-latest, ubuntu-24.04-arm, macos-15-intel, macos-latest, windows-latest]
-        # windows-latest, windows-11-vs2026-arm
+        # windows-11-vs2026-arm
 
     steps:
     - name: Checkout repository code
@@ -40,6 +40,10 @@ jobs:
       with:
         name: cibw-wheels-${{ matrix.os }}
         path: ./wheels/*.whl
+
+    - name: Setup tmate session
+      if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
 
   upload_pypi:
     name: Publish package distributions to PyPI

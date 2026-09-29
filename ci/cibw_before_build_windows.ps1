@@ -157,6 +157,7 @@ Write-Host "----------- building rdkit"
 if (Test-Path "C:\rdkit-build") {
     Remove-Item -Recurse -Force "C:\rdkit-build"
 }
+#-G "Ninja" `
 cmake -S "C:\rdkit-src" -B "C:\rdkit-build" `
     -DCMAKE_PREFIX_PATH="$EnvPath" `
     -DBoost_ROOT="$EnvPath" `
@@ -170,6 +171,8 @@ cmake -S "C:\rdkit-src" -B "C:\rdkit-build" `
     -DRDK_BUILD_AVALON_SUPPORT=OFF `
     -DRDK_BUILD_FREETYPE_SUPPORT=OFF `
     -DRDK_BUILD_PGSQL=OFF
+
+cmake --build "C:\rdkit-build" --target RDGeneral --config Releases
 
 $env:RDKit_INCLUDE_DIR = "$RdkitSourceDir\Code"
 $env:RDKit_LIBRARY_DIR = "$EnvPath\lib"
