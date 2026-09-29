@@ -126,7 +126,7 @@ delvewheel repair --add-path C:/mm_env/Library/bin --no-dll \
 PYTAG = "& python -c 'import sys; print(f\"{sys.version_info.major}.{sys.version_info.minor}\")'"
 CONDA_PREFIX = "C:/mm_env"
 CMAKE_PREFIX_PATH = "C:/mm_env"
-RDKIT_INCLUDE_DIR = "C:/rdkit_src/Code"
+RDKIT_INCLUDE_DIR = "C:/rdkit-src/Code"
 RDKIT_BUILD_INCLUDE_DIR = "C:/rdkit-build/Code"
 RDKIT_LIB_DIR = "C:/mm_env/Lib/site-packages/rdkit.libs"
 BOOST_INCLUDE_DIR = "C:/mm_env/include"
