@@ -1,5 +1,6 @@
 # ai helped
 $ErrorActionPreference = "Stop"
+$ProgressPreference = 'SilentlyContinue'
 Set-StrictMode -Version Latest
 
 # Setup python and rdkit paths
