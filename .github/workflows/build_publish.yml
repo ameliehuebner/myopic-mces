@@ -16,7 +16,8 @@ jobs:
     strategy:
       fail-fast: true           # TODO: for now, while debugging
       matrix:
-        os: [ubuntu-latest, ubuntu-24.04-arm, macos-15-intel, macos-latest, windows-latest]
+        os: [windows-latest]
+        #os: [ubuntu-latest, ubuntu-24.04-arm, macos-15-intel, macos-latest, windows-latest]
         # windows-11-vs2026-arm
 
     steps:
@@ -28,6 +29,9 @@ jobs:
       with:
         python-version: "3.10"
         cache: "pip"
+
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
 
     # build wheels
     - name: Build wheels
@@ -41,9 +45,9 @@ jobs:
         name: cibw-wheels-${{ matrix.os }}
         path: ./wheels/*.whl
 
-    - name: Setup tmate session
-      if: ${{ failure() }}
-      uses: mxschmitt/action-tmate@v3
+    # - name: Setup tmate session
+    #   if: ${{ failure() }}
+    #   uses: mxschmitt/action-tmate@v3
 
   upload_pypi:
     name: Publish package distributions to PyPI
