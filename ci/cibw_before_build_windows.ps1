@@ -161,6 +161,7 @@ if (Test-Path "C:\rdkit-build") {
 #-G "Ninja" `
 cmake -S "C:\rdkit-src" -B "C:\rdkit-build" `
     -DCMAKE_PREFIX_PATH="$EnvPath" `
+    -DBoost_COMPILER="-vc143" `
     -DBoost_ROOT="$EnvPath" `
     -DBOOST_ROOT="$EnvPath" `
     -DRDK_BUILD_PYTHON_WRAPPERS=OFF `
