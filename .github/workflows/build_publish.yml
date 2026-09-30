@@ -41,9 +41,9 @@ jobs:
         name: cibw-wheels-${{ matrix.os }}
         path: ./wheels/*.whl
 
-    # - name: Setup tmate session
-    #   if: ${{ failure() }}
-    #   uses: mxschmitt/action-tmate@v3
+    - name: Setup tmate session
+      if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
 
   upload_pypi:
     name: Publish package distributions to PyPI
