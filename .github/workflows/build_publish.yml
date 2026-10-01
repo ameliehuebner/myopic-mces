@@ -1,6 +1,14 @@
 name: Build and publish to PyPI
 
-on: push
+on: 
+  workflow_dispatch:
+        inputs:
+          debug_enabled:
+            type: boolean
+            description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
+            required: false
+            default: 'false'
+  # push
   # push:
   #   branches:
   #     - main
@@ -30,8 +38,14 @@ jobs:
         python-version: "3.10"
         cache: "pip"
 
+    - name: setup msys2
+      uses: msys2/setup-msys2@v2
+      id: setup-msys2
+
     - name: Setup tmate session
       uses: mxschmitt/action-tmate@v3
+      with:
+        msys2-location: ${{ steps.setup-msys2.outputs.msys2-location }}
 
     # build wheels
     - name: Build wheels
