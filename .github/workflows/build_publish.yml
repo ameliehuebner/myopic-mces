@@ -32,8 +32,6 @@ jobs:
 
     - name: Setup tmate session
       uses: mxschmitt/action-tmate@v3
-      with:
-        msys2-location: ${{ steps.setup-msys2.outputs.msys2-location }}
 
     # build wheels
     - name: Build wheels
