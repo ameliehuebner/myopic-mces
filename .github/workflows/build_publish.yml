@@ -30,8 +30,15 @@ jobs:
         python-version: "3.10"
         cache: "pip"
 
+    - name: force failure to test tmate
+      run: exit 1
+
     - name: Setup tmate session
+      if: ${{ failure() }}
       uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
+      timeout-minutes: 15
 
     # build wheels
     - name: Build wheels
@@ -44,10 +51,6 @@ jobs:
       with:
         name: cibw-wheels-${{ matrix.os }}
         path: ./wheels/*.whl
-
-    # - name: Setup tmate session
-    #   if: ${{ failure() }}
-    #   uses: mxschmitt/action-tmate@v3
 
   upload_pypi:
     name: Publish package distributions to PyPI
