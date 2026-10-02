@@ -119,6 +119,35 @@ Move-Item "C:\boost_extract\boost_$BoostUnderscored" $BoostRoot
 
 Set-Location $BoostRoot
 
+Write$env:BOOST_INCLUDE_DIR = $BoostIncludeDir
+Write-Host "----------- building rdkit"
+
+if (Test-Path "C:\rdkit-build") {
+    Remove-Item -Recurse -Force "C:\rdkit-build"
+}
+
+$toolsetFile = "$EnvPath\lib\cmake\BoostDetectToolset-1.85.0.cmake"
+Write-Host "=== BoostDetectToolset content ==="
+Get-Content $toolsetFile
+
+#-G "Ninja" `
+cmake -S "C:\rdkit-src" -B "C:\rdkit-build" `
+    -DCMAKE_PREFIX_PATH="$EnvPath" `
+    -DBoost_COMPILER="-vc143" `
+    -DBoost_ROOT="$EnvPath" `
+    -DBOOST_ROOT="$EnvPath" `
+    -DEIGEN3_INCLUDE_DIR="$EnvPath\Library\include\eigen3" `
+    -DRDK_BUILD_PYTHON_WRAPPERS=OFF `
+    -DRDK_BUILD_CPP_TESTS=OFF `
+    -DRDK_BUILD_CAIRO_SUPPORT=OFF `
+    -DRDK_BUILD_COORDGEN_SUPPORT=OFF `
+    -DRDK_BUILD_INCHI_SUPPORT=OFF `
+    -DRDK_BUILD_MAEPARSER_SUPPORT=OFF `
+    -DRDK_BUILD_AVALON_SUPPORT=OFF `
+    -DRDK_BUILD_FREETYPE_SUPPORT=OFF `
+    -DRDK_BUILD_PGSQL=OFF
+
+cmake --build "C:\rdkit-build" --target RDGeneral --config Release
 Write-Host "cl.exe:"
 where.exe cl.exe
 
@@ -152,29 +181,7 @@ if (-not (Test-Path ".\b2.exe")) { throw "Boost bootstrap failed" }
 $BoostIncludeDir = "$EnvPath\include"
 Write-Host "Boost include directory: $BoostIncludeDir"
 
-$env:BOOST_INCLUDE_DIR = $BoostIncludeDir
-Write-Host "----------- building rdkit"
 
-if (Test-Path "C:\rdkit-build") {
-    Remove-Item -Recurse -Force "C:\rdkit-build"
-}
-#-G "Ninja" `
-cmake -S "C:\rdkit-src" -B "C:\rdkit-build" `
-    -DCMAKE_PREFIX_PATH="$EnvPath" `
-    -DBoost_COMPILER="-vc143" `
-    -DBoost_ROOT="$EnvPath" `
-    -DBOOST_ROOT="$EnvPath" `
-    -DRDK_BUILD_PYTHON_WRAPPERS=OFF `
-    -DRDK_BUILD_CPP_TESTS=OFF `
-    -DRDK_BUILD_CAIRO_SUPPORT=OFF `
-    -DRDK_BUILD_COORDGEN_SUPPORT=OFF `
-    -DRDK_BUILD_INCHI_SUPPORT=OFF `
-    -DRDK_BUILD_MAEPARSER_SUPPORT=OFF `
-    -DRDK_BUILD_AVALON_SUPPORT=OFF `
-    -DRDK_BUILD_FREETYPE_SUPPORT=OFF `
-    -DRDK_BUILD_PGSQL=OFF
-
-cmake --build "C:\rdkit-build" --target RDGeneral --config Releases
 
 $env:RDKit_INCLUDE_DIR = "$RdkitSourceDir\Code"
 $env:RDKit_LIBRARY_DIR = "$EnvPath\lib"
