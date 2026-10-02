@@ -135,11 +135,12 @@ if (-not (Test-Path ".\b2.exe")) { throw "Boost bootstrap failed" }
 
 & .\b2.exe `
     toolset=msvc address-model=64 variant=release link=shared runtime-link=shared `
-    --layout=system --prefix="$EnvPath" `
+    --prefix="$EnvPath" `
     --with-serialization --with-iostreams --with-system `
     install
 
-$BoostIncludeDir = "$EnvPath\include"
+$BoostIncludeDir = (Get-ChildItem "$EnvPath\include" -Directory -Filter "boost-*" | Select-Object -First 1).FullName
+if (-not $BoostIncludeDir) { throw "Boost versioned include dir not found" }
 Write-Host "Boost include directory: $BoostIncludeDir"
 $env:BOOST_INCLUDE_DIR = $BoostIncludeDir
 
