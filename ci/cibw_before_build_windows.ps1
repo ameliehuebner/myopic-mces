@@ -143,6 +143,8 @@ $BoostIncludeDir = "$EnvPath\include"
 Write-Host "Boost include directory: $BoostIncludeDir"
 $env:BOOST_INCLUDE_DIR = $BoostIncludeDir
 
+Get-ChildItem "$EnvPath\lib" -Filter "*boost_system*"
+
 Write-Host "----------- building rdkit"
 
 if (Test-Path "C:\rdkit-build") {
@@ -161,6 +163,9 @@ Get-Content $toolsetFile | Select-String "vc143"
 Write-Host "=== BoostDetectToolset content (after patch) ==="
 Get-Content $toolsetFile | Select-String "vc143"
 
+Write-Host "=== Boost grep ==="
+Get-Content "$EnvPath\lib\cmake\boost_system-1.85.0\boost_system-config.cmake" | Select-String "NOT_FOUND_MESSAGE|_BOOST_" -Context 2,2
+
 #-G "Ninja" `
 cmake -S "C:\rdkit-src" -B "C:\rdkit-build" `
     -DCMAKE_PREFIX_PATH="$EnvPath" `
@@ -168,6 +173,7 @@ cmake -S "C:\rdkit-src" -B "C:\rdkit-build" `
     -DBoost_ROOT="$EnvPath" `
     -DBOOST_ROOT="$EnvPath" `
     -DEIGEN3_INCLUDE_DIR="$EnvPath\Library\include\eigen3" `
+    -DEIGEN3_VERSION_OK=TRUE `
     -DRDK_BUILD_PYTHON_WRAPPERS=OFF `
     -DRDK_BUILD_CPP_TESTS=OFF `
     -DRDK_BUILD_CAIRO_SUPPORT=OFF `
