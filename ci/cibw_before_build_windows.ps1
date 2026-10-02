@@ -119,7 +119,30 @@ Move-Item "C:\boost_extract\boost_$BoostUnderscored" $BoostRoot
 
 Set-Location $BoostRoot
 
-Write$env:BOOST_INCLUDE_DIR = $BoostIncludeDir
+Write-Host "cl.exe:"
+where.exe cl.exe
+Write-Host "VSINSTALLDIR: $env:VSINSTALLDIR"
+Write-Host "VCToolsInstallDir: $env:VCToolsInstallDir"
+
+$ShimDir = "C:\boost-shim"
+New-Item -ItemType Directory -Force $ShimDir | Out-Null
+"@echo off`r`ncl.exe %*" | Set-Content "$ShimDir\msvc.bat"
+$env:Path = "$ShimDir;$env:Path"
+
+Write-Host "----------- bootstrapping Boost"
+& .\bootstrap.bat vc143
+if (-not (Test-Path ".\b2.exe")) { throw "Boost bootstrap failed" }
+
+& .\b2.exe `
+    toolset=msvc address-model=64 variant=release link=shared runtime-link=shared `
+    --layout=system --prefix="$EnvPath" `
+    --with-serialization --with-iostreams --with-system `
+    install
+
+$BoostIncludeDir = "$EnvPath\include"
+Write-Host "Boost include directory: $BoostIncludeDir"
+$env:BOOST_INCLUDE_DIR = $BoostIncludeDir
+
 Write-Host "----------- building rdkit"
 
 if (Test-Path "C:\rdkit-build") {
@@ -148,43 +171,6 @@ cmake -S "C:\rdkit-src" -B "C:\rdkit-build" `
     -DRDK_BUILD_PGSQL=OFF
 
 cmake --build "C:\rdkit-build" --target RDGeneral --config Release
-Write-Host "cl.exe:"
-where.exe cl.exe
-
-Write-Host "VSINSTALLDIR: $env:VSINSTALLDIR"
-Write-Host "VCToolsInstallDir: $env:VCToolsInstallDir"
-
-$ShimDir = "C:\boost-shim"
-New-Item -ItemType Directory -Force $ShimDir | Out-Null
-"@echo off`r`ncl.exe %*" | Set-Content "$ShimDir\msvc.bat"
-$env:Path = "$ShimDir;$env:Path"
-
-Write-Host "----------- bootstrapping Boost"
-
-& .\bootstrap.bat vc143
-
-if (-not (Test-Path ".\b2.exe")) { throw "Boost bootstrap failed" }
-
-& .\b2.exe `
-    toolset=msvc `
-    address-model=64 `
-    variant=release `
-    link=shared `
-    runtime-link=shared `
-    --layout=system `
-    --prefix="$EnvPath" `
-    --with-serialization `
-    --with-iostreams `
-    --with-system `
-    install
-
-$BoostIncludeDir = "$EnvPath\include"
-Write-Host "Boost include directory: $BoostIncludeDir"
-
-
-
-$env:RDKit_INCLUDE_DIR = "$RdkitSourceDir\Code"
-$env:RDKit_LIBRARY_DIR = "$EnvPath\lib"
 
 Write-Host "=== RDKit generated headers ==="
 Get-ChildItem "C:\rdkit-build" -Filter "export.h" -Recurse -ErrorAction SilentlyContinue |
