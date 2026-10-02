@@ -150,8 +150,16 @@ if (Test-Path "C:\rdkit-build") {
 }
 
 $toolsetFile = "$EnvPath\lib\cmake\BoostDetectToolset-1.85.0.cmake"
-Write-Host "=== BoostDetectToolset content ==="
-Get-Content $toolsetFile
+Write-Host "=== BoostDetectToolset content (before patch)==="
+Get-Content $toolsetFile | Select-String "vc143"
+
+(Get-Content $toolsetFile) -replace `
+    '\(MSVC_VERSION GREATER 1929\) AND \(MSVC_VERSION LESS 1940\)', `
+    '(MSVC_VERSION GREATER 1929) AND (MSVC_VERSION LESS 1960)' |
+    Set-Content $toolsetFile
+
+Write-Host "=== BoostDetectToolset content (after patch) ==="
+Get-Content $toolsetFile | Select-String "vc143"
 
 #-G "Ninja" `
 cmake -S "C:\rdkit-src" -B "C:\rdkit-build" `
