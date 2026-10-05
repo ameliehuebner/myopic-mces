@@ -177,6 +177,7 @@ cmake -S "C:\rdkit-src" -B "C:\rdkit-build" `
     -DBOOST_ROOT="$EnvPath" `
     -DEIGEN3_INCLUDE_DIR="$EnvPath\Library\include\eigen3" `
     -DEIGEN3_VERSION_OK=TRUE `
+    -DBUILD_SHARED_LIBS=ON `
     -DRDK_BUILD_PYTHON_WRAPPERS=OFF `
     -DRDK_BUILD_CPP_TESTS=OFF `
     -DRDK_BUILD_CAIRO_SUPPORT=OFF `
