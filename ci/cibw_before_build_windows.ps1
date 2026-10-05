@@ -139,6 +139,9 @@ if (-not (Test-Path ".\b2.exe")) { throw "Boost bootstrap failed" }
     --with-serialization --with-iostreams --with-system `
     install
 
+Write-Host "=== Contents of boost_system-1.85.0 cmake dir ==="
+Get-ChildItem "$EnvPath\lib\cmake\boost_system-1.85.0" -Force
+
 $BoostIncludeDir = (Get-ChildItem "$EnvPath\include" -Directory -Filter "boost-*" | Select-Object -First 1).FullName
 if (-not $BoostIncludeDir) { throw "Boost versioned include dir not found" }
 Write-Host "Boost include directory: $BoostIncludeDir"
@@ -180,6 +183,8 @@ cmake -S "C:\rdkit-src" -B "C:\rdkit-build" `
     -DRDK_BUILD_CAIRO_SUPPORT=OFF `
     -DRDK_BUILD_COORDGEN_SUPPORT=OFF `
     -DRDK_BUILD_INCHI_SUPPORT=OFF `
+    -DRDK_USE_BOOST_SERIALIZATION=OFF `
+    -DRDK_USE_BOOST_IOSTREAMS=OFF `
     -DRDK_BUILD_MAEPARSER_SUPPORT=OFF `
     -DRDK_BUILD_AVALON_SUPPORT=OFF `
     -DRDK_BUILD_FREETYPE_SUPPORT=OFF `
