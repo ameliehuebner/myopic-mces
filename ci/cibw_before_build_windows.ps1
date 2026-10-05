@@ -197,7 +197,7 @@ Get-ChildItem "C:\rdkit-build" -Filter "export.h" -Recurse -ErrorAction Silently
     Select-Object -ExpandProperty FullName
 
 Write-Host "=== Boost headers ==="
-Test-Path "$EnvPath\include\boost*\python.hpp"
+Test-Path "$BoostIncludeDir\boost*\python.hpp"
 
 Write-Host "=== Boost libraries ==="
 Get-ChildItem "$EnvPath\lib" -Recurse | Where-Object Name -match "boost" | Select-Object FullName
@@ -216,9 +216,9 @@ Test-Path "C:\rdkit-src\Code\RDGeneral\export.h"
 Test-Path "C:\rdkit-build\Code\RDGeneral\export.h"
 
 Write-Host "=== Boost ==="
-Test-Path "C:\mm_env\include\boost*\python.hpp"
-Get-ChildItem "C:\mm_env\lib" -Filter "*boost*python*" -ErrorAction SilentlyContinue
+Test-Path "$BoostIncludeDir\boost*\python.hpp"
+Get-ChildItem "$BoostIncludeDir" -Filter "*boost*python*" -ErrorAction SilentlyContinue
 
-if (-not (Test-Path "$EnvPath\include\boost*\python.hpp")) {
+if (-not (Test-Path "$BoostIncludeDir\boost\python.hpp")) {
     throw "Boost.Python headers were not installed"
 }
