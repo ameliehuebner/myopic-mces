@@ -173,7 +173,6 @@ Get-Content "$EnvPath\lib\cmake\boost_system-1.85.0\boost_system-config.cmake" |
 #-G "Ninja" `
 cmake -S "C:\rdkit-src" -B "C:\rdkit-build" `
     -DCMAKE_PREFIX_PATH="$EnvPath" `
-    -DBoost_COMPILER="-vc143" `
     -DBoost_ROOT="$EnvPath" `
     -DBOOST_ROOT="$EnvPath" `
     -DEIGEN3_INCLUDE_DIR="$EnvPath\Library\include\eigen3" `
@@ -193,8 +192,8 @@ cmake -S "C:\rdkit-src" -B "C:\rdkit-build" `
 cmake --build "C:\rdkit-build" --target RDGeneral --config Release
 
 Write-Host "=== RDKit generated headers ==="
-Get-ChildItem "C:\rdkit-build" -Filter "export.h" -Recurse -ErrorAction SilentlyContinue |
-    Select-Object -ExpandProperty FullName
+Get-ChildItem "C:\rdkit-build" -Filter "export.h" -Recurse -ErrorAction SilentlyContinue | Select-Object FullName
+Get-ChildItem "C:\rdkit-src" -Filter "export.h" -Recurse -ErrorAction SilentlyContinue | Select-Object FullName
 
 Write-Host "=== Boost headers ==="
 Test-Path "$BoostIncludeDir\boost*\python.hpp"
