@@ -66,6 +66,7 @@ message(STATUS "Boost.Python: ${BOOST_RDKIT_LIBRARY}")
 message(STATUS "RDKit graphmol: ${RDKIT_GRAPHMOL_LIBRARY}")
 message(STATUS "RDKit datastructs: ${RDKIT_DATASTRUCTS_LIBRARY}")
 message(STATUS "RDKit smilesparse: ${RDKIT_SMILESPARSE_LIBRARY}")
+message(STATUS "RDKit general lib: ${RDKIT_RDGENERAL_LIBRARY}")
 
 if (NOT MSVC)
     target_compile_options(mmces_filters PRIVATE
