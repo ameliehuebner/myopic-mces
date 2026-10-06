@@ -129,4 +129,5 @@ CMAKE_PREFIX_PATH = "C:/mm_env"
 RDKIT_INCLUDE_DIR = "C:/rdkit-src/Code"
 RDKIT_BUILD_INCLUDE_DIR = "C:/rdkit-build/Code"
 RDKIT_LIB_DIR = "C:/mm_env/Lib/site-packages/rdkit.libs"
-BOOST_INCLUDE_DIR = "C:/mm_env/include"
+# this is hartcoded, fix if boost version of rdkit changes (so if rdkit version changes)
+BOOST_INCLUDE_DIR = "C:/mm_env/include/boost-1_85"
