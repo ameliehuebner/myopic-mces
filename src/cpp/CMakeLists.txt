@@ -47,12 +47,14 @@ if(WIN32)
     file(GLOB RDKIT_GRAPHMOL_LIBRARY "${RDKIT_LIB_DIR}/RDKitGraphMol*.lib")
     file(GLOB RDKIT_DATASTRUCTS_LIBRARY "${RDKIT_LIB_DIR}/RDKitDataStructs*.lib")
     file(GLOB RDKIT_SMILESPARSE_LIBRARY "${RDKIT_LIB_DIR}/RDKitSmilesParse*.lib")
+    file(GLOB RDKIT_RDGENERAL_LIBRARY    "${RDKIT_LIB_DIR}/RDKitRDGeneral*.lib")
     target_compile_definitions(mmces_filters PRIVATE BOOST_ALL_NO_LIB BOOST_PYTHON_DYNAMIC_LIB)
 else()
     file(GLOB BOOST_RDKIT_LIBRARY "${RDKIT_LIB_DIR}/libboost_python*.so*")
     file(GLOB RDKIT_GRAPHMOL_LIBRARY "${RDKIT_LIB_DIR}/libRDKitGraphMol*")
     file(GLOB RDKIT_DATASTRUCTS_LIBRARY "${RDKIT_LIB_DIR}/libRDKitDataStructs*")
-    file(GLOB RDKIT_SMILESPARSE_LIBRARY "${RDKIT_LIB_DIR}/libRDKitSmilesParse*")     
+    file(GLOB RDKIT_SMILESPARSE_LIBRARY "${RDKIT_LIB_DIR}/libRDKitSmilesParse*")
+    file(GLOB RDKIT_RDGENERAL_LIBRARY    "${RDKIT_LIB_DIR}/libRDKitRDGeneral*")     
 endif()
 
 if(BOOST_RDKIT_LIBRARY)
@@ -90,6 +92,7 @@ target_link_libraries(mmces_filters PRIVATE
     "${RDKIT_DATASTRUCTS_LIBRARY}"
     "${RDKIT_GRAPHMOL_LIBRARY}"
     "${RDKIT_SMILESPARSE_LIBRARY}"
+    "${RDKIT_RDGENERAL_LIBRARY}"
 )
 
 # makes sure compiled .so file is in correct place for python wheel
