@@ -70,7 +70,7 @@ if (-not (Test-Path "$RdkitSourceDir\Code\GraphMol\ROMol.h")) {
 Write-Host "RDKit headers: $RdkitSourceDir\Code"
 
 $libsDir = "$EnvPath\Lib\site-packages\rdkit.libs"
-foreach ($pat in "RDKitGraphMol*","RDKitDataStructs*","RDKitSmilesParse*","RDKitGeneral*","boost_python*") {
+foreach ($pat in "RDKitGraphMol*","RDKitDataStructs*","RDKitSmilesParse*","RDKitRDGeneral*","boost_python*") {
     $dll = Get-ChildItem $libsDir -Filter "$pat.dll" | Select-Object -First 1
     if (-not $dll) { throw "DLL $pat not found" }
     $exports = & dumpbin /exports $dll.FullName |
