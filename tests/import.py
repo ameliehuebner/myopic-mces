@@ -4,6 +4,8 @@ import mmces_filters
 mol1 = Chem.MolFromSmiles("CCO")
 mol2 = Chem.MolFromSmiles("CCC")
 
+print("RDKit version:", rdkit.__version__)
+print("RDKit paths:", rdkit.__path__)
 print(type(mol1))
 print(mmces_filters.filter2.__doc__)
 
