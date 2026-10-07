@@ -43,36 +43,23 @@ message(STATUS "RDKit include directory: ${RDKIT_INCLUDE_DIR}")
 message(STATUS "RDKit build include directory: ${RDKIT_BUILD_INCLUDE_DIR}")
 
 if(WIN32)
-    #file(GLOB BOOST_RDKIT_LIBRARY "${RDKIT_LIB_DIR}/boost_python*.lib")
-    #file(GLOB RDKIT_GRAPHMOL_LIBRARY "${RDKIT_LIB_DIR}/RDKitGraphMol*.lib")
-    #file(GLOB RDKIT_DATASTRUCTS_LIBRARY "${RDKIT_LIB_DIR}/RDKitDataStructs*.lib")
-    #file(GLOB RDKIT_SMILESPARSE_LIBRARY "${RDKIT_LIB_DIR}/RDKitSmilesParse*.lib")
-    #file(GLOB RDKIT_RDGENERAL_LIBRARY    "${RDKIT_LIB_DIR}/RDKitRDGeneral*.lib")
-    #target_compile_definitions(mmces_filters PRIVATE BOOST_ALL_NO_LIB BOOST_PYTHON_DYNAMIC_LIB)
-
-    find_package(Boost REQUIRED COMPONENTS python)
-    
-    # Conda RDKit legt libs oft in Library/lib ab
-    find_library(RDKIT_GRAPHMOL_LIBRARY NAMES GraphMol RDKitGraphMol PATHS "${RDKIT_LIB_DIR}" NO_DEFAULT_PATH)
-    find_library(RDKIT_DATASTRUCTS_LIBRARY NAMES DataStructs RDKitDataStructs PATHS "${RDKIT_LIB_DIR}" NO_DEFAULT_PATH)
-    find_library(RDKIT_SMILESPARSE_LIBRARY NAMES SmilesParse RDKitSmilesParse PATHS "${RDKIT_LIB_DIR}" NO_DEFAULT_PATH)
-    find_library(RDKIT_RDGENERAL_LIBRARY NAMES RDGeneral RDKitRDGeneral PATHS "${RDKIT_LIB_DIR}" NO_DEFAULT_PATH)
-    
-    set(BOOST_RDKIT_LIBRARY ${Boost_PYTHON_LIBRARY})
+    file(GLOB BOOST_RDKIT_LIBRARY "${RDKIT_LIB_DIR}/boost_python*.lib")
+    file(GLOB RDKIT_GRAPHMOL_LIBRARY "${RDKIT_LIB_DIR}/RDKitGraphMol*.lib")
+    file(GLOB RDKIT_DATASTRUCTS_LIBRARY "${RDKIT_LIB_DIR}/RDKitDataStructs*.lib")
+    file(GLOB RDKIT_SMILESPARSE_LIBRARY "${RDKIT_LIB_DIR}/RDKitSmilesParse*.lib")
+    file(GLOB RDKIT_RDGENERAL_LIBRARY    "${RDKIT_LIB_DIR}/RDKitRDGeneral*.lib")
     target_compile_definitions(mmces_filters PRIVATE BOOST_ALL_NO_LIB BOOST_PYTHON_DYNAMIC_LIB)
-
 else()
     file(GLOB BOOST_RDKIT_LIBRARY "${RDKIT_LIB_DIR}/libboost_python*.so*")
     file(GLOB RDKIT_GRAPHMOL_LIBRARY "${RDKIT_LIB_DIR}/libRDKitGraphMol*")
     file(GLOB RDKIT_DATASTRUCTS_LIBRARY "${RDKIT_LIB_DIR}/libRDKitDataStructs*")
     file(GLOB RDKIT_SMILESPARSE_LIBRARY "${RDKIT_LIB_DIR}/libRDKitSmilesParse*")
-    file(GLOB RDKIT_RDGENERAL_LIBRARY    "${RDKIT_LIB_DIR}/libRDKitRDGeneral*") 
-
-    if(BOOST_RDKIT_LIBRARY)
-        list(GET BOOST_RDKIT_LIBRARY 0 BOOST_RDKIT_LIBRARY)
-    endif()  
+    file(GLOB RDKIT_RDGENERAL_LIBRARY    "${RDKIT_LIB_DIR}/libRDKitRDGeneral*")     
 endif()
 
+if(BOOST_RDKIT_LIBRARY)
+    list(GET BOOST_RDKIT_LIBRARY 0 BOOST_RDKIT_LIBRARY)
+endif()
 
 message(STATUS "Conda Dir: $ENV{CONDA_PREFIX}")
 message(STATUS "Boost.Python: ${BOOST_RDKIT_LIBRARY}")
@@ -93,12 +80,11 @@ target_include_directories(mmces_filters PRIVATE
     "${RDKIT_BUILD_INCLUDE_DIR}"
     "${RDKIT_LIB_DIR}"
     "$ENV{CONDA_PREFIX}/include"
-    "$ENV{BOOST_INCLUDE_DIR}"
+    "$ENV{CONDA_PREFIX}/Lib/site-packages/rdkit"
 )
 
 target_link_directories(mmces_filters PRIVATE
     "${RDKIT_LIB_DIR}"
-    "$ENV{CONDA_PREFIX}/Library/lib"
 )
 
 target_link_libraries(mmces_filters PRIVATE
