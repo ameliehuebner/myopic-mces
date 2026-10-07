@@ -4,6 +4,9 @@ import mmces_filters
 mol1 = Chem.MolFromSmiles("CCO")
 mol2 = Chem.MolFromSmiles("CCC")
 
+print(type(mol1))
+print(mmces_filters.filter2.__doc__)
+
 res0 = mmces_filters.filter0(mol1, mol2)
 res1 = mmces_filters.filter1(mol1, mol2)
 res2 = mmces_filters.filter2(mol1, mol2)
