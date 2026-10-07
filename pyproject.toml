@@ -125,4 +125,4 @@ RDKIT_INCLUDE_DIR = "C:/rdkit-src/Code"
 RDKIT_BUILD_INCLUDE_DIR = "C:/rdkit-src/Code"
 RDKIT_LIB_DIR = "C:/mm_env/Lib/site-packages/rdkit.libs"
 # this is hartcoded, fix if boost version of rdkit changes (so if rdkit version changes)
-#BOOST_INCLUDE_DIR = "C:/mm_env/include/boost-1_85"
+BOOST_INCLUDE_DIR = "C:/mm_env/include/boost-1_85"

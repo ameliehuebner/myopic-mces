@@ -130,12 +130,16 @@ New-Item -ItemType Directory -Force $ShimDir | Out-Null
 $env:Path = "$ShimDir;$env:Path"
 
 Write-Host "----------- bootstrapping Boost"
-& .\bootstrap.bat vc143
+& .\bootstrap.bat vc143 `
+    --prefix="$EnvPath" `
+    --with-libraries=python,serialization,iostreams,system
 if (-not (Test-Path ".\b2.exe")) { throw "Boost bootstrap failed" }
 
 & .\b2.exe `
     toolset=msvc address-model=64 variant=release link=shared runtime-link=shared `
     --prefix="$EnvPath" `
+    -sPYTHON_INCLUDE="$ENV_PATH/include" `
+    -sPYTHON_LIB="$ENV_PATH/libs" `
     --with-serialization --with-iostreams --with-system `
     install
 

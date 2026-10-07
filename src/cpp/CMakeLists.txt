@@ -80,7 +80,7 @@ target_include_directories(mmces_filters PRIVATE
     "${RDKIT_BUILD_INCLUDE_DIR}"
     "${RDKIT_LIB_DIR}"
     "$ENV{CONDA_PREFIX}/include"
-    "$ENV{CONDA_PREFIX}/Lib/site-packages/rdkit"
+    "$ENV{BOOST_INCLUDE_DIR}"
 )
 
 target_link_directories(mmces_filters PRIVATE
