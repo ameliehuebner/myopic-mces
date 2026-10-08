@@ -114,9 +114,10 @@ CXX = "clang++"
 [tool.cibuildwheel.windows]
 archs = ["auto64"]
 before-build = "powershell {project}/ci/cibw_before_build_windows.ps1"
-repair-wheel-command = """
-delvewheel repair --add-path C:/mm_env/Lib/site-packages/rdkit.libs;C:/mm_env/Library/bin -w {dest_dir} {wheel}
-"""
+#repair-wheel-command = """
+#delvewheel repair --add-path C:/mm_env/Lib/site-packages/rdkit.libs;C:/mm_env/Library/bin -w {dest_dir} {wheel}
+#"""
+repair-wheel-command = "python {project}/ci/repair_windows.py {wheel} {dest_dir}"
 [tool.cibuildwheel.windows.environment]
 PYTAG = "& python -c 'import sys; print(f\"{sys.version_info.major}.{sys.version_info.minor}\")'"
 CONDA_PREFIX = "C:/mm_env"
