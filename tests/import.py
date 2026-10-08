@@ -1,4 +1,5 @@
 from rdkit import Chem
+import rdkit
 import mmces_filters
 
 mol1 = Chem.MolFromSmiles("CCO")
