@@ -57,7 +57,7 @@ skip = "*-musllinux_*" # does not work with conda-forge Boost
 # this does not the test the repo, but the wheel after repairing
 # important to check if bindings are valid
 # and it also checks if there are duplicate library dependencies present
-test-command = "python {project}/tests/import.py && pytest -m \"not timelimit\" -k \"not CPLEX_PY\""
+test-command = "python {project}/tests/test_import_smoke.py && pytest -m \"not timelimit\" -k \"not CPLEX_PY\""
 test-sources = ["tests", "testdata"]
 test-groups = ["dev"]
 test-extras = ["cplex", "hdf5"]
