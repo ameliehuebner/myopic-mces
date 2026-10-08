@@ -138,8 +138,8 @@ if (-not (Test-Path ".\b2.exe")) { throw "Boost bootstrap failed" }
 & .\b2.exe `
     toolset=msvc address-model=64 variant=release link=shared runtime-link=shared `
     --prefix="$EnvPath" `
-    -sPYTHON_INCLUDE="$ENV_PATH/include" `
-    -sPYTHON_LIB="$ENV_PATH/libs" `
+    -sPYTHON_INCLUDE="$EnvPath/include" `
+    -sPYTHON_LIB="$EnvPath/libs" `
     --with-serialization --with-iostreams --with-system `
     install
 
