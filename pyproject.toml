@@ -11,7 +11,6 @@ description = "A package for computation of the myopic MCES distance"
 readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.10"
-requires-python = ">=3.10"
 classifiers = [
             "Programming Language :: Python :: 3",
             "License :: OSI Approved :: MIT License",
@@ -22,7 +21,7 @@ dependencies = [
              "networkx >= 3.0",
              "pulp[cbc]>=2.7.0,<=3.3.2",
              "scipy >= 1.10.1",
-             "joblib >= 1.2.0"
+             "joblib >= 1.2.0",
              "tqdm>=4.70.0",
 ]
 
@@ -40,7 +39,7 @@ cplex = [
     "docplex>=2.32.264",
 ]
 cpp = [
-    "myopic_mces_cpp==2.1.0".
+    "myopic_mces_cpp==2.1.0"
 ]
 hdf5 = [
     "h5py>=3.11.0",
@@ -55,5 +54,4 @@ dev = [
     "pandas>=2.3.3"
 ]
 [tool.uv.sources]
-myopic-mces-cpp = { path = "cpp" }
 mcesdb = { git = "ssh://git@git.uni-jena.de/bioinf-mit/ms/mces/mces-database.git" }
