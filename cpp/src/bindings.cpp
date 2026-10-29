@@ -11,6 +11,8 @@ extern double applyFilter2(RDKit::ROMol* mol1, RDKit::ROMol* mol2);
 // boost bindings for all three filters
 BOOST_PYTHON_MODULE(mmces_filters) {
     using namespace boost::python;
+
+    import("rdkit.Chem.rdchem");
     
     // map the Python name "filterX" to C++ function "applyFilterX"
     def("filter0", applyFilter0, (boost::python::arg("mol1"), boost::python::arg("mol2")), "Calculates filter 0 for two molecules (atom type difference)");

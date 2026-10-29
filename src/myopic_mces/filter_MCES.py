@@ -9,6 +9,10 @@ import networkx as nx
 from typing import DefaultDict
 import numpy as np
 from enum import Enum
+import rdkit
+import os
+
+from ._cpp import mmces_filters as mf, HAS_CPP, CPP_IMPORT_ERROR
 
 # TODO: if additional options such as node_limit are added in the future, add dedicated computation mode
 class ComputationMode(Enum):
@@ -245,56 +249,60 @@ def filter2(G1,G2):
 
     return res
 
-# def apply_filter(G1,G2,threshold,always_stronger_bound=True,use_bound_zero=False):
-#     """
-#      Finds a lower bound for the distance
+def apply_filter(G1,G2,threshold,always_stronger_bound=True,use_bound_zero=False):
+    """
+     Finds a lower bound for the distance
 
-#      Parameters
-#      ----------
-#      G1 : networkx.classes.graph.Graph
-#          Graph representing the first molecule.
-#      G2 : networkx.classes.graph.Graph
-#          Graph representing the second molecule.
-#      threshold : int
-#          Threshold for the comparison. We want to find a lower bound that is higher than the threshold
-#      always_stronger_bound : bool
-#          if true, always compute and use the second stronger bound
-#      use_bound_zero : bool
-#          if true, also use an additional weak (molecular formula-based) filter
+     Parameters
+     ----------
+     G1 : networkx.classes.graph.Graph
+         Graph representing the first molecule.
+     G2 : networkx.classes.graph.Graph
+         Graph representing the second molecule.
+     threshold : int
+         Threshold for the comparison. We want to find a lower bound that is higher than the threshold
+     always_stronger_bound : bool
+         if true, always compute and use the second stronger bound
+     use_bound_zero : bool
+         if true, also use an additional weak (molecular formula-based) filter
 
 
 
-#      Returns:
-#      -------
-#      float
-#          Lower bound for the distance between the molecules
-#      int
-#          Which lower bound was chosen: 2 - depending on threshold, 4 - second lower bound
+     Returns:
+     -------
+     float
+         Lower bound for the distance between the molecules
+     int
+         Which lower bound was chosen: 2 - depending on threshold, 4 - second lower bound
 
-#     """
-#     if always_stronger_bound:
-#         d=filter2(G1,G2)
-#         return d, ComputationMode.STRONGEST_BOUND.value
-#     else:
-#         if (use_bound_zero):
-#             # zero lower bound
-#             d=filter0(G1,G2)
-#             if (d > threshold):
-#                 return d, ComputationMode.DYNAMIC_BOUND0.value
-#         #calculate first lower bound
-#         d=filter1(G1,G2)
-#         if (d > threshold):
-#             return d, ComputationMode.DYNAMIC_BOUND1.value
-#         #calculate second lower bound
-#         d=filter2(G1,G2)
-#         return d, ComputationMode.DYNAMIC_BOUND2.value
+    """
+    if always_stronger_bound:
+        d=filter2(G1,G2)
+        return d, ComputationMode.STRONGEST_BOUND.value
+    else:
+        if (use_bound_zero):
+            # zero lower bound
+            d=filter0(G1,G2)
+            if (d > threshold):
+                return d, ComputationMode.DYNAMIC_BOUND0.value
+        #calculate first lower bound
+        d=filter1(G1,G2)
+        if (d > threshold):
+            return d, ComputationMode.DYNAMIC_BOUND1.value
+        #calculate second lower bound
+        d=filter2(G1,G2)
+        return d, ComputationMode.DYNAMIC_BOUND2.value
 
 
 def apply_CPP_filter(G1, G2, threshold,always_stronger_bound=True,use_bound_zero=False):
     """
      same as the other one just cpp filters
     """
-    import mmces_filters as mf
+    if not HAS_CPP: # this is basically a safety net underneath a safety net
+        raise ImportError(f'C++ filters not available ({CPP_IMPORT_ERROR}). '
+                          'Install with: pip install "myopic_mces[cpp]"')
+    if not (hasattr(G1, 'mol') and hasattr(G2, 'mol')):
+        raise ValueError('C++ filters need graphs constructed with construct_graph(..., save_mol=True)')
 
     if always_stronger_bound:
             d=mf.filter2(G1.mol,G2.mol)
