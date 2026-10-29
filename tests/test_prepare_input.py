@@ -2,8 +2,9 @@ import math
 import subprocess
 import sys
 from pathlib import Path
+import pytest
 
-import h5py
+h5py = pytest.importorskip("h5py")
 import numpy as np
 import pytest
 

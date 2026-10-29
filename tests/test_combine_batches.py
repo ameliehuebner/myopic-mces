@@ -1,7 +1,8 @@
 import subprocess
 import sys
 
-import h5py
+import pytest
+h5py = pytest.importorskip("h5py")
 import numpy as np
 
 from test_prepare_input import SMILES, _prepare
@@ -42,7 +43,6 @@ def _naive_lookup(tmp_path, pairs):
     )
     rows = [line.split(',') for line in output_csv.read_text().splitlines()]
     return {pairs[int(r[0])]: (float(r[1]), int(r[3])) for r in rows}
-
 
 def test_combine_matches_naive_self_mode(tmp_path):
     batch_files = _prepare(tmp_path, SMILES, batch_size=13)

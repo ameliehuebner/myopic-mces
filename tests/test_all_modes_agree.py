@@ -1,9 +1,9 @@
 import shutil
 import subprocess
 from pathlib import Path
-
-import h5py
 import pytest
+
+h5py = pytest.importorskip("h5py")
 
 from test_prepare_input import SMILES, _prepare
 from test_combine_batches import _compute_batches, _combine, _naive_lookup
@@ -11,7 +11,6 @@ from test_combine_batches import _compute_batches, _combine, _naive_lookup
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 pytestmark = pytest.mark.skipif(shutil.which('nextflow') is None, reason='nextflow not installed')
-
 
 def _run_nextflow(tmp_path, smiles_a, smiles_b):
     a_file = tmp_path / 'nf_a.txt'
@@ -27,7 +26,6 @@ def _run_nextflow(tmp_path, smiles_a, smiles_b):
         cwd=tmp_path, check=True,
     )
     return out_dir / 'combined.hdf5'
-
 
 def test_csv_matches_manual_hdf5_matches_nextflow(tmp_path):
     smiles_a, smiles_b = SMILES[:7], SMILES[7:]
