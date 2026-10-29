@@ -2,10 +2,13 @@
 
 [![Test](https://github.com/AlBi-HHU/myopic-mces/actions/workflows/test.yml/badge.svg)](https://github.com/AlBi-HHU/myopic-mces/actions/workflows/test.yml)
 [![PyPI version](https://img.shields.io/pypi/v/myopic-mces)](https://pypi.org/project/myopic-mces/)
-[![Python version](https://img.shields.io/badge/python-%3E%3D3.8-blue)](https://www.python.org/)
+[![Python version](https://img.shields.io/badge/python%3E%3D3.10-blue)](https://www.python.org/)
 [![DOI](https://img.shields.io/badge/DOI-10.1038%2Fs41467--024--55462--w-blue)](https://doi.org/10.1038/s41467-024-55462-w)
 
 Reference implementation for computing myopic Maximum Common Edge Subgraph (MCES) distances, described in the publication [Coverage bias in small molecule machine learning](https://doi.org/10.1038/s41467-024-55462-w) ([Citation](#citation)).
+
+> [!NOTE]
+> **New in version 2.1.0:** much faster computations with the C++ implementation of the lower bounds (default bound ~266× faster than Python, see [benchmarks](benchmarks/README.md)). Install via `pip install myopic-mces[cpp]`.
 
 ## Usage
 
@@ -15,12 +18,28 @@ input-file: `index,SMILES1,SMILES2`
 
 output-file: `index,myopic MCES distance,computation time in seconds,computation mode`
 
+The output file contains additional information if the MCES mapping for the structure and/or numbered smiles are computed:
+
+output-file: `index,myopic MCES distance,computation time in seconds,computation mode,mapping`
+
+output-file: `index,myopic MCES distance,computation time in seconds,computation mode,mapping,numsmiles1,numsmiles2`
+
+output-file: `index,myopic MCES distance,computation time in seconds,computation mode,numsmiles1,numsmiles2`
+
+If the MCES structure is computed, it is saved as a mapping. If the numsmiles are saved as well, they contain the indexed smiles in which each atom is numbered. The structure mapping has the format `{(AtomID_SMILES1, AtomID_SMILES1): (AtomID_SMILES2, AtomID_SMILES2)}`, where the first AtomID pair is a bond in the molecule depicted by SMILES1 and the second pair is a bond in the molecule depicted by
+SMILES2.
+
 Download via pip and execute:
 ```bash
 pip install myopic-mces
 myopic_mces input-file [output-file]
 
 The `output-file` argument may be omitted when using `--hdf5_mode` (see below).
+```
+
+The lower bounds are also available as a much faster C++ implementation, which is used automatically when installed (see [Recommended settings](#recommended-settings)):
+```bash
+pip install myopic-mces[cpp]
 ```
 
 Alternatively, to install directly from this repository:
@@ -45,7 +64,7 @@ pip install pulp[cbc]
 
 General options
 ```
---threshold  int        Threshold for the comparison.
+--threshold int         Threshold for the comparison.
                         Exact distance is only calculated if the distance is lower than the threshold.
                         If set to -1 the exact distance is always calculated.
                         Default: 10
@@ -103,18 +122,23 @@ Experimental options for myopic MCES distance computation
                             NOTE: When used in combination with `prepare_input`, only use with `--no_shuffle`.
 
 --lookup_threshold          Use with `--use_matrix_lookup`: Precomputed values equal or greater than the threshold 
-                            will be ignored; these instances will be recomputed
+                            will be ignored; these instances will be recomputed.
+
+--num_smiles                If set, calculates and saves SMILES of numbered atoms to the output for each input smiles.
+
+--structure                 If set, saves a mapping of the pairwise MCES structure to the output. Only calculated for molecules
+                            for which the MCES distance has been proven exact by the ILP.
 
 ```
 
 ## Recommended settings
 
-To speed up computations and save space, use the CPLEX solver, HDF5-mode (see [below](#prepare-hdf5-input)) and enable `--choose_bound_dynamically`:
+To speed up computations and save space, use the variant of the package implemented in C++ (install via `pip install myopic_mces[cpp]`; computes the default lower bound ~266× faster than the Python implementation, see [benchmarks](benchmarks/README.md)), the CPLEX solver (requires `pip install myopic_mces[cplex]` for newer CPLEX versions), HDF5-mode (see [below](#prepare-hdf5-input)) and enable `--choose_bound_dynamically`:
 ```bash
 PATH=$CPLEX_HOME/bin/x86-64_linux/:$PATH python -m myopic_mces.myopic_mces --threshold 10 --solver CPLEX_CMD --solver_onethreaded --solver_no_msg --hdf5_mode input-file.hdf5
 ```
 
-The `PATH`-variable has to be adapted to contain the directory of the CPLEX executable (see [the PuLP documentation](https://coin-or.github.io/pulp/guides/how_to_configure_solvers.html#cplex)).
+The `PATH`-variable might have to be adapted, depending on the CPLEX version, to contain the directory of the CPLEX executable (see [the PuLP documentation](https://coin-or.github.io/pulp/guides/how_to_configure_solvers.html#cplex)).
 
 ## Dependencies and installation
 
@@ -133,6 +157,16 @@ The recommended method of installation is via `pip`.
 ```bash
 pip install myopic_mces
 ```
+
+Optional extras enable additional functionality:
+```bash
+pip install myopic_mces[hdf5]   # for HDF5 mode
+pip install myopic_mces[cplex]  # for newer versions of the CPLEX solver
+pip install myopic_mces[cpp]    # for the fast C++ implementation of the lower bounds
+```
+
+> [!IMPORTANT]
+> The C++ bounds are built against a specific RDKit version (currently `rdkit==2025.3.4`), and installing the `cpp` extra pins RDKit to that version. Other RDKit versions are not supported at the moment. If you cannot use this RDKit version, use the pure Python implementation (install without the `cpp` extra).
 
 Dependencies can also be installed via [conda](https://docs.conda.io/en/latest/miniconda.html) or [mamba](https://github.com/mamba-org/mamba):
 Download this repository, navigate to the download location and execute the following commands (replacing `conda` with `mamba` when using mamba):
@@ -177,6 +211,8 @@ python -m myopic_mces.prepare_input input-file.csv output-folder/ --batch_size 5
 
 #### Prepare HDF5 input
 
+Requires `pip install myopic_mces[hdf5]`.
+
 To conserve space, input for myopic MCES computation can now be provided as a HDF5-file containing the following "Datasets":
 
 - `smiles`: list of all unique SMILES
@@ -208,6 +244,8 @@ python -m myopic_mces.prepare_input --batch_size 50_000_000 --hdf5_mode --use_db
 ```
 
 ### [`combine_hdf5_batches.py`](src/myopic_mces/combine_hdf5_batches.py)
+
+Requires `pip install myopic_mces[hdf5]`.
 
 Batches results can be combined into a single HDF5 file with this script:
 ```bash
